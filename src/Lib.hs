@@ -2,12 +2,21 @@ module Lib
     ( run
     ) where
 
+import Control.Monad
+import System.Directory
 import System.Environment
 import System.Exit
+import System.FilePath
 import System.IO
+import System.Process
 
 repoURI :: String
 repoURI = "https://github.com/ruby/ruby"
+
+getRootPath :: IO FilePath
+getRootPath = do
+  home <- getHomeDirectory
+  return $ home </> ".monumental-ruby"
 
 run :: IO ()
 run = do
@@ -46,3 +55,15 @@ help _ =
             , ""
             , "Too many arguments given."
             ]
+
+getDest :: String -> IO FilePath
+getDest version = do
+  root <- getRootPath
+  return $ foldl1 combine [root, "repo", version]
+
+clone :: String -> IO ()
+clone version = do
+  dest <- getDest version
+  exists <- doesDirectoryExist dest
+  unless exists $
+         callProcess "git" ["clone", "--depth", "1", "--branch", version, repoURI, dest]

@@ -30,6 +30,7 @@ doCmd :: [String] -> IO ()
 doCmd [] = putStrLn usage >> exitFailure
 doCmd (name:args) = cmd name args
   where
+    cmd "install" = install
     cmd "help" = help
     cmd x = const $ failWith $ "monumental-ruby: no such command " ++ show x
 
@@ -39,6 +40,7 @@ usage =
           , ""
           , "Usage:"
           , ""
+          , "        install      install specified versions of Ruby"
           , "        help         show help"
           , ""
           ]
@@ -47,6 +49,7 @@ help :: [String] -> IO ()
 help [] = putStrLn usage
 help [topic] = helpOf topic
   where
+    helpOf "install" = putStrLn "usage: monumental-ruby install versions..."
     helpOf "help" = putStrLn "usage: monumental-ruby help [topic]"
     helpOf topic = failWith $ "unknown help topic " ++ show topic ++ ". Run 'monumental-ruby help'."
 help _ =
@@ -55,6 +58,13 @@ help _ =
             , ""
             , "Too many arguments given."
             ]
+
+install :: [String] -> IO ()
+install [] = failWith "install: 1 or more arguments required"
+install versions = do
+  root <- getRootPath
+  createDirectoryIfMissing True $ root </> "repo"
+  mapM_ clone versions
 
 getDest :: String -> IO FilePath
 getDest version = do

@@ -19,9 +19,7 @@ getRootPath = do
   return $ home </> ".monumental-ruby"
 
 run :: IO ()
-run = do
-  args <- getArgs
-  doCmd args
+run = getArgs >>= doCmd
 
 failWith :: String -> IO ()
 failWith msg = hPutStrLn stderr msg >> exitFailure

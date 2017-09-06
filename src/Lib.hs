@@ -12,14 +12,14 @@ repoURI = "https://github.com/ruby/ruby"
 run :: IO ()
 run = do
   args <- getArgs
-  parseArgs args
+  doCmd args
 
 failWith :: String -> IO ()
 failWith msg = hPutStrLn stderr msg >> exitFailure
 
-parseArgs :: [String] -> IO ()
-parseArgs [] = putStrLn usage >> exitFailure
-parseArgs (name:args) = cmd name args
+doCmd :: [String] -> IO ()
+doCmd [] = putStrLn usage >> exitFailure
+doCmd (name:args) = cmd name args
   where
     cmd "help" = help
     cmd x = \_ -> failWith $ "monumental-ruby: no such command " ++ show x

@@ -134,7 +134,7 @@ script :: String -> String -> String
 script root version =
   unlines [ "#!/bin/sh"
           , ""
-          , show (foldl1 combine [root, "python", version, "bin", "python3"]) ++ " \"$@\""
+          , show (foldl1 combine [root, "ruby", version, "bin", "ruby"]) ++ " \"$@\""
           ]
 
 list :: [String] -> IO ()

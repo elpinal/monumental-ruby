@@ -2,12 +2,14 @@ module Lib
     ( run
     ) where
 
+import Control.Exception.Safe
 import Control.Monad
 import System.Directory
 import System.Environment
 import System.Exit
 import System.FilePath
 import System.IO
+import System.IO.Error
 import System.Process
 
 repoURI :: String
@@ -29,6 +31,7 @@ doCmd [] = putStrLn usage >> exitFailure
 doCmd (name:args) = cmd name args
   where
     cmd "install" = install
+    cmd "uninstall" = uninstall
     cmd "help" = help
     cmd x = const $ failWith $ "monumental-ruby: no such command " ++ show x
 
@@ -39,6 +42,7 @@ usage =
           , "Usage:"
           , ""
           , "        install      install specified versions of Ruby"
+          , "        uninstall    uninstall specified versions of Ruby"
           , "        help         show help"
           , ""
           ]
@@ -48,6 +52,7 @@ help [] = putStrLn usage
 help [topic] = helpOf topic
   where
     helpOf "install" = putStrLn "usage: monumental-ruby install versions..."
+    helpOf "uninstall" = putStrLn "usage: monumental-ruby uninstall versions..."
     helpOf "help" = putStrLn "usage: monumental-ruby help [topic]"
     helpOf topic = failWith $ "unknown help topic " ++ show topic ++ ". Run 'monumental-ruby help'."
 help _ =
@@ -94,3 +99,13 @@ build version = do
         when (code /= ExitSuccess)
              exitFailure
 
+uninstall :: [String] -> IO ()
+uninstall [] = failWith "usage: monumental-ruby uninstall versions..."
+uninstall versions = mapM_ remove versions
+    where
+      remove v = mapM_ (removeDirs v) ["repo", "ruby"]
+      removeDirs v dir = do
+        root <- getRootPath
+        removeDirectoryRecursive (root </> dir </> v)
+          `catch` \e -> unless (isDoesNotExistError e)
+                               (throw e)

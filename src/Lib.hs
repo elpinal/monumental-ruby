@@ -65,6 +65,7 @@ install versions = do
   root <- getRootPath
   createDirectoryIfMissing True $ root </> "repo"
   mapM_ clone versions
+  mapM_ build versions
 
 getDest :: String -> IO FilePath
 getDest version = do
@@ -77,3 +78,21 @@ clone version = do
   exists <- doesDirectoryExist dest
   unless exists $
          callProcess "git" ["clone", "--depth", "1", "--branch", version, repoURI, dest]
+
+build :: String -> IO ()
+build version = do
+  root <- getRootPath
+  dest <- getDest version
+  mapM_ (exec dest)
+        [ ("autoconf", [])
+        , (dest </> "configure", ["--prefix", foldl1 combine [root, "ruby", version]])
+        , ("make", ["-k", "-j4"])
+        , ("make", ["install"])
+        ]
+    where
+      exec dest (cmd, args) = do
+        (_, _, _, ph) <- createProcess (proc cmd args){ cwd = Just dest }
+        code <- waitForProcess ph
+        when (code /= ExitSuccess)
+             exitFailure
+

@@ -32,6 +32,7 @@ doCmd (name:args) = cmd name args
   where
     cmd "install" = install
     cmd "uninstall" = uninstall
+    cmd "list" = list
     cmd "help" = help
     cmd x = const $ failWith $ "monumental-ruby: no such command " ++ show x
 
@@ -43,6 +44,7 @@ usage =
           , ""
           , "        install      install specified versions of Ruby"
           , "        uninstall    uninstall specified versions of Ruby"
+          , "        list         list installed versions of Ruby"
           , "        help         show help"
           , ""
           ]
@@ -53,6 +55,7 @@ help [topic] = helpOf topic
   where
     helpOf "install" = putStrLn "usage: monumental-ruby install versions..."
     helpOf "uninstall" = putStrLn "usage: monumental-ruby uninstall versions..."
+    helpOf "list" = putStrLn "usage: monumental-ruby list"
     helpOf "help" = putStrLn "usage: monumental-ruby help [topic]"
     helpOf topic = failWith $ "unknown help topic " ++ show topic ++ ". Run 'monumental-ruby help'."
 help _ =
@@ -109,3 +112,10 @@ uninstall versions = mapM_ remove versions
         removeDirectoryRecursive (root </> dir </> v)
           `catch` \e -> unless (isDoesNotExistError e)
                                (throw e)
+
+list :: [String] -> IO ()
+list [] = do
+  root <- getRootPath
+  dirs <- listDirectory $ root </> "ruby"
+  mapM_ putStrLn dirs
+list _ = failWith "usage: list"

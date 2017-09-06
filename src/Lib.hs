@@ -140,6 +140,10 @@ script root version =
 list :: [String] -> IO ()
 list [] = do
   root <- getRootPath
-  dirs <- listDirectory $ root </> "ruby"
+  let dirs = listDirectory $ root </> "ruby"
+             `catch`
+             \e -> unless (isDoesNotExistError e)
+                       (throw e)
+  dirs <- dirs
   mapM_ putStrLn dirs
 list _ = failWith "usage: list"

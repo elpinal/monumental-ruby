@@ -22,7 +22,7 @@ doCmd [] = putStrLn usage >> exitFailure
 doCmd (name:args) = cmd name args
   where
     cmd "help" = help
-    cmd x = \_ -> failWith $ "monumental-ruby: no such command " ++ show x
+    cmd x = const $ failWith $ "monumental-ruby: no such command " ++ show x
 
 usage :: String
 usage =

@@ -22,23 +22,26 @@ getRootPath = do
   return $ home </> ".monumental-ruby"
 
 run :: IO ()
-run = getArgs >>= doCmd
+run = do
+  root <- getRootPath
+  args <- getArgs
+  doCmd root args
 
 failWith :: String -> IO ()
 failWith msg = hPutStrLn stderr msg >> exitFailure
 
-type Command = [String] -> IO ()
+type Command = FilePath -> [String] -> IO ()
 
 doCmd :: Command
-doCmd [] = putStrLn usage >> exitFailure
-doCmd (name:args) = cmd name args
+doCmd _ [] = putStrLn usage >> exitFailure
+doCmd root (name:args) = cmd name root args
   where
     cmd "install" = install
     cmd "uninstall" = uninstall
     cmd "use" = use
     cmd "list" = list
     cmd "help" = help
-    cmd x = const $ failWith $ "monumental-ruby: no such command " ++ show x
+    cmd x = const . const $ failWith $ "monumental-ruby: no such command " ++ show x
 
 usage :: String
 usage =
@@ -55,8 +58,8 @@ usage =
           ]
 
 help :: Command
-help [] = putStrLn usage
-help [topic] = helpOf topic
+help _ [] = putStrLn usage
+help _ [topic] = helpOf topic
   where
     helpOf "install" = putStrLn "usage: monumental-ruby install versions..."
     helpOf "uninstall" = putStrLn "usage: monumental-ruby uninstall versions..."
@@ -64,7 +67,7 @@ help [topic] = helpOf topic
     helpOf "list" = putStrLn "usage: monumental-ruby list"
     helpOf "help" = putStrLn "usage: monumental-ruby help [topic]"
     helpOf topic = failWith $ "unknown help topic " ++ show topic ++ ". Run 'monumental-ruby help'."
-help _ =
+help _ _ =
   failWith $
     unlines [ "usage: monumental-ruby help command"
             , ""
@@ -72,29 +75,26 @@ help _ =
             ]
 
 install :: Command
-install [] = failWith "install: 1 or more arguments required"
-install versions = do
-  root <- getRootPath
+install _ [] = failWith "install: 1 or more arguments required"
+install root versions = do
   createDirectoryIfMissing True $ root </> "repo"
-  mapM_ clone versions
-  mapM_ build versions
+  mapM_ (clone root) versions
+  mapM_ (build root) versions
 
-getDest :: String -> IO FilePath
-getDest version = do
-  root <- getRootPath
+getDest :: FilePath -> String -> IO FilePath
+getDest root version = do
   return $ foldl1 combine [root, "repo", version]
 
-clone :: String -> IO ()
-clone version = do
-  dest <- getDest version
+clone :: FilePath -> String -> IO ()
+clone root version = do
+  dest <- getDest root version
   exists <- doesDirectoryExist dest
   unless exists $
          callProcess "git" ["clone", "--depth", "1", "--branch", version, repoURI, dest]
 
-build :: String -> IO ()
-build version = do
-  root <- getRootPath
-  dest <- getDest version
+build :: FilePath -> String -> IO ()
+build root version = do
+  dest <- getDest root version
   mapM_ (exec dest)
         [ ("autoconf", [])
         , (dest </> "configure", ["--prefix", foldl1 combine [root, "ruby", version]])
@@ -109,34 +109,31 @@ build version = do
              exitFailure
 
 uninstall :: Command
-uninstall [] = failWith "usage: monumental-ruby uninstall versions..."
-uninstall versions = mapM_ remove versions
+uninstall _ [] = failWith "usage: monumental-ruby uninstall versions..."
+uninstall root versions = mapM_ remove versions
     where
       remove v = mapM_ (removeDirs v) ["repo", "ruby"]
       removeDirs v dir = do
-        root <- getRootPath
         removeDirectoryRecursive (root </> dir </> v)
           `catch` \e -> unless (isDoesNotExistError e)
                                (throw e)
 
 use :: Command
-use [] = failWith "use: 1 argument required"
-use [version] = do
-  root <- getRootPath
+use _ [] = failWith "use: 1 argument required"
+use root [version] = do
   exists <- doesFileExist $ foldl1 combine [root, "ruby", version, "bin", "ruby"]
   unless exists $
          failWith $ "use: not installed: " ++ show version
   createDirectoryIfMissing True $ root </> "bin"
   let dest = root </> "bin" </> "ruby"
   createSymbolicLink (foldl1 combine [root, "ruby", version, "bin", "ruby"]) dest
-use _ = failWith "use: too many arguments"
+use _ _ = failWith "use: too many arguments"
 
 list :: Command
-list [] = flip catch handler $ do
-  root <- getRootPath
+list root [] = flip catch handler $ do
   dirs <- listDirectory $ root </> "ruby"
   mapM_ putStrLn dirs
     where
       handler e = unless (isDoesNotExistError e)
                   (throw e)
-list _ = failWith "usage: list"
+list _ _ = failWith "usage: list"

@@ -17,9 +17,7 @@ repoURI :: String
 repoURI = "https://github.com/ruby/ruby"
 
 getRootPath :: IO FilePath
-getRootPath = do
-  home <- getHomeDirectory
-  return $ home </> ".monumental-ruby"
+getRootPath = flip combine ".monumental-ruby" <$> getHomeDirectory 
 
 run :: IO ()
 run = do

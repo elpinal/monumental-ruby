@@ -130,6 +130,7 @@ use root [version] = do
   exists <- doesDirectoryExist src
   unless exists $
          failWith $ "use: not installed: " ++ show version
+  removeDirectoryLink dest
   createSymbolicLink src dest
     where
       src :: FilePath

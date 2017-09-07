@@ -138,12 +138,11 @@ script root version =
           ]
 
 list :: [String] -> IO ()
-list [] = do
+list [] = flip catch handler $ do
   root <- getRootPath
-  let dirs = listDirectory $ root </> "ruby"
-             `catch`
-             \e -> unless (isDoesNotExistError e)
-                       (throw e)
-  dirs <- dirs
+  dirs <- listDirectory $ root </> "ruby"
   mapM_ putStrLn dirs
+    where
+      handler e = unless (isDoesNotExistError e)
+                  (throw e)
 list _ = failWith "usage: list"

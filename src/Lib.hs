@@ -39,7 +39,10 @@ doCmd root (name:args) = cmd name root args
     cmd "use" = use
     cmd "list" = list
     cmd "help" = help
-    cmd x = const . const $ failWith $ "monumental-ruby: no such command " ++ show x
+    cmd x = nocmd x
+
+nocmd :: String -> Command
+nocmd x _ _ = failWith $ "monumental-ruby: no such command " ++ show x
 
 usage :: String
 usage =

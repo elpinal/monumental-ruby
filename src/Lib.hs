@@ -1,6 +1,4 @@
-module Lib
-    ( run
-    ) where
+module Lib where
 
 import Control.Exception.Safe
 import Control.Monad

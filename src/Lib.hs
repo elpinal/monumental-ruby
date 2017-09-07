@@ -34,6 +34,7 @@ doCmd :: Command
 doCmd _ [] = putStrLn usage >> exitFailure
 doCmd root (name:args) = cmd name root args
   where
+    cmd :: String -> Command
     cmd "install" = install
     cmd "uninstall" = uninstall
     cmd "use" = use
@@ -62,6 +63,7 @@ help :: Command
 help _ [] = putStrLn usage
 help _ [topic] = helpOf topic
   where
+    helpOf :: String -> IO ()
     helpOf "install" = putStrLn "usage: monumental-ruby install versions..."
     helpOf "uninstall" = putStrLn "usage: monumental-ruby uninstall versions..."
     helpOf "use" = putStrLn "usage: monumental-ruby use version"
@@ -101,7 +103,9 @@ build root version =
         , ("make", ["install"])
         ]
     where
+      dest :: FilePath
       dest = getDest root version
+      exec :: (FilePath, [String]) -> IO ()
       exec (cmd, args) = do
         (_, _, _, ph) <- createProcess (proc cmd args){ cwd = Just dest }
         code <- waitForProcess ph
@@ -112,7 +116,9 @@ uninstall :: Command
 uninstall _ [] = failWith "usage: monumental-ruby uninstall versions..."
 uninstall root versions = mapM_ remove versions
     where
+      remove :: FilePath -> IO ()
       remove v = mapM_ (removeDirs v) ["repo", "ruby"]
+      removeDirs :: FilePath -> FilePath -> IO ()
       removeDirs v dir =
         removeDirectoryRecursive (root </> dir </> v)
           `catch` \e -> unless (isDoesNotExistError e)
@@ -127,7 +133,9 @@ use root [version] = do
   createDirectoryIfMissing True $ root </> "bin"
   createSymbolicLink src dest
     where
+      src :: FilePath
       src = foldl1 combine [root, "ruby", version, "bin", "ruby"]
+      dest :: FilePath
       dest = root </> "bin" </> "ruby"
 use _ _ = failWith "use: too many arguments"
 
@@ -136,6 +144,7 @@ list root [] = flip catch handler $ do
   dirs <- listDirectory $ root </> "ruby"
   mapM_ putStrLn dirs
     where
+      handler :: IOError -> IO ()
       handler e = unless (isDoesNotExistError e)
                   (throw e)
 list _ _ = failWith "usage: list"

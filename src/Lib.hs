@@ -10,6 +10,7 @@ import System.Exit
 import System.FilePath
 import System.IO
 import System.IO.Error
+import System.Posix.Files
 import System.Process
 
 repoURI :: String
@@ -125,17 +126,8 @@ use [version] = do
          failWith $ "use: not installed: " ++ show version
   createDirectoryIfMissing True $ root </> "bin"
   let dest = root </> "bin" </> "ruby"
-  writeFile dest $ script root version
-  perm <- getPermissions dest
-  setPermissions dest $ setOwnerExecutable True perm
+  createSymbolicLink (foldl1 combine [root, "ruby", version, "bin", "ruby"]) dest
 use _ = failWith "use: too many arguments"
-
-script :: String -> String -> String
-script root version =
-  unlines [ "#!/bin/sh"
-          , ""
-          , show (foldl1 combine [root, "ruby", version, "bin", "ruby"]) ++ " \"$@\""
-          ]
 
 list :: [String] -> IO ()
 list [] = flip catch handler $ do

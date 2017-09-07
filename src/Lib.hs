@@ -93,15 +93,15 @@ clone root version = do
 
 build :: FilePath -> String -> IO ()
 build root version = do
-  let dest = getDest root version
-  mapM_ (exec dest)
+  mapM_ exec
         [ ("autoconf", [])
         , (dest </> "configure", ["--prefix", foldl1 combine [root, "ruby", version]])
         , ("make", ["-k", "-j4"])
         , ("make", ["install"])
         ]
     where
-      exec dest (cmd, args) = do
+      dest = getDest root version
+      exec (cmd, args) = do
         (_, _, _, ph) <- createProcess (proc cmd args){ cwd = Just dest }
         code <- waitForProcess ph
         when (code /= ExitSuccess)

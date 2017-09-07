@@ -92,7 +92,7 @@ clone root version = do
          callProcess "git" ["clone", "--depth", "1", "--branch", version, repoURI, dest]
 
 build :: FilePath -> String -> IO ()
-build root version = do
+build root version =
   mapM_ exec
         [ ("autoconf", [])
         , (dest </> "configure", ["--prefix", foldl1 combine [root, "ruby", version]])
@@ -112,7 +112,7 @@ uninstall _ [] = failWith "usage: monumental-ruby uninstall versions..."
 uninstall root versions = mapM_ remove versions
     where
       remove v = mapM_ (removeDirs v) ["repo", "ruby"]
-      removeDirs v dir = do
+      removeDirs v dir =
         removeDirectoryRecursive (root </> dir </> v)
           `catch` \e -> unless (isDoesNotExistError e)
                                (throw e)

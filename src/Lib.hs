@@ -27,7 +27,9 @@ run = getArgs >>= doCmd
 failWith :: String -> IO ()
 failWith msg = hPutStrLn stderr msg >> exitFailure
 
-doCmd :: [String] -> IO ()
+type Command = [String] -> IO ()
+
+doCmd :: Command
 doCmd [] = putStrLn usage >> exitFailure
 doCmd (name:args) = cmd name args
   where
@@ -52,7 +54,7 @@ usage =
           , ""
           ]
 
-help :: [String] -> IO ()
+help :: Command
 help [] = putStrLn usage
 help [topic] = helpOf topic
   where
@@ -69,7 +71,7 @@ help _ =
             , "Too many arguments given."
             ]
 
-install :: [String] -> IO ()
+install :: Command
 install [] = failWith "install: 1 or more arguments required"
 install versions = do
   root <- getRootPath
@@ -106,7 +108,7 @@ build version = do
         when (code /= ExitSuccess)
              exitFailure
 
-uninstall :: [String] -> IO ()
+uninstall :: Command
 uninstall [] = failWith "usage: monumental-ruby uninstall versions..."
 uninstall versions = mapM_ remove versions
     where
@@ -117,7 +119,7 @@ uninstall versions = mapM_ remove versions
           `catch` \e -> unless (isDoesNotExistError e)
                                (throw e)
 
-use :: [String] -> IO ()
+use :: Command
 use [] = failWith "use: 1 argument required"
 use [version] = do
   root <- getRootPath
@@ -129,7 +131,7 @@ use [version] = do
   createSymbolicLink (foldl1 combine [root, "ruby", version, "bin", "ruby"]) dest
 use _ = failWith "use: too many arguments"
 
-list :: [String] -> IO ()
+list :: Command
 list [] = flip catch handler $ do
   root <- getRootPath
   dirs <- listDirectory $ root </> "ruby"

@@ -124,10 +124,10 @@ use root [version] = do
   unless exists $
          failWith $ "use: not installed: " ++ show version
   createDirectoryIfMissing True $ root </> "bin"
-  let dest = root </> "bin" </> "ruby"
   createSymbolicLink src dest
     where
       src = foldl1 combine [root, "ruby", version, "bin", "ruby"]
+      dest = root </> "bin" </> "ruby"
 use _ _ = failWith "use: too many arguments"
 
 list :: Command

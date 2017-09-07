@@ -120,12 +120,14 @@ uninstall root versions = mapM_ remove versions
 use :: Command
 use _ [] = failWith "use: 1 argument required"
 use root [version] = do
-  exists <- doesFileExist $ foldl1 combine [root, "ruby", version, "bin", "ruby"]
+  exists <- doesFileExist src
   unless exists $
          failWith $ "use: not installed: " ++ show version
   createDirectoryIfMissing True $ root </> "bin"
   let dest = root </> "bin" </> "ruby"
-  createSymbolicLink (foldl1 combine [root, "ruby", version, "bin", "ruby"]) dest
+  createSymbolicLink src dest
+    where
+      src = foldl1 combine [root, "ruby", version, "bin", "ruby"]
 use _ _ = failWith "use: too many arguments"
 
 list :: Command

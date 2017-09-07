@@ -105,6 +105,7 @@ build root version =
     where
       dest :: FilePath
       dest = getDest root version
+
       exec :: (FilePath, [String]) -> IO ()
       exec (cmd, args) = do
         (_, _, _, ph) <- createProcess (proc cmd args){ cwd = Just dest }
@@ -118,6 +119,7 @@ uninstall root versions = mapM_ remove versions
     where
       remove :: FilePath -> IO ()
       remove v = mapM_ (removeDirs v) ["repo", "ruby"]
+
       removeDirs :: FilePath -> FilePath -> IO ()
       removeDirs v dir =
         removeDirectoryRecursive (root </> dir </> v)
@@ -135,6 +137,7 @@ use root [version] = do
     where
       src :: FilePath
       src = foldl1 combine [root, "ruby", version, "bin", "ruby"]
+
       dest :: FilePath
       dest = root </> "bin" </> "ruby"
 use _ _ = failWith "use: too many arguments"

@@ -81,20 +81,19 @@ install root versions = do
   mapM_ (clone root) versions
   mapM_ (build root) versions
 
-getDest :: FilePath -> String -> IO FilePath
-getDest root version = do
-  return $ foldl1 combine [root, "repo", version]
+getDest :: FilePath -> String -> FilePath
+getDest root version = foldl1 combine [root, "repo", version]
 
 clone :: FilePath -> String -> IO ()
 clone root version = do
-  dest <- getDest root version
+  let dest = getDest root version
   exists <- doesDirectoryExist dest
   unless exists $
          callProcess "git" ["clone", "--depth", "1", "--branch", version, repoURI, dest]
 
 build :: FilePath -> String -> IO ()
 build root version = do
-  dest <- getDest root version
+  let dest = getDest root version
   mapM_ (exec dest)
         [ ("autoconf", [])
         , (dest </> "configure", ["--prefix", foldl1 combine [root, "ruby", version]])

@@ -100,7 +100,7 @@ usage =
     minSpaces = 4
 
     align :: Command -> Int
-    align (Command {name = n}) = minSpaces + longestNameLen - length n
+    align Command {name = n} = minSpaces + longestNameLen - length n
 
 help :: CmdFunc
 help _ [] = putStrLn usage

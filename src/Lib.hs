@@ -37,31 +37,36 @@ data Command = Command { name :: String
 
 cmds :: Map.Map String Command
 cmds =
-  Map.fromList [ ("install", Command { name = "install"
-                                     , func = install
-                                     , cmdUsage = "usage: monumental-ruby install versions..."
-                                     , desc = "install specified versions of Ruby"
-                                     })
-               , ("uninstall", Command { name = "uninstall"
-                                       , func = uninstall
-                                       , cmdUsage = "usage: monumental-ruby uninstall versions..."
-                                       , desc = "uninstall specified versions of Ruby"
-                                       })
-               , ("use", Command { name = "use"
-                                 , func = use
-                                 , cmdUsage = "usage: monumental-ruby use version"
-                                 , desc = "select the specific version of Ruby as cureent version"
-                                 })
-               , ("list", Command { name = "list"
-                                  , func = list
-                                  , cmdUsage = "usage: monumental-ruby list"
-                                  , desc = "list installed versions of Ruby"
-                                  })
-               , ("help", Command { name = "help"
-                                  , func = help
-                                  , cmdUsage = "usage: monumental-ruby help [topic]"
-                                  , desc = "show help"
-                                  })
+  Map.fromList [ ("install",
+                  Command { name = "install"
+                          , func = install
+                          , cmdUsage = "usage: monumental-ruby install versions..."
+                          , desc = "install specified versions of Ruby"
+                          })
+               , ("uninstall",
+                  Command { name = "uninstall"
+                          , func = uninstall
+                          , cmdUsage = "usage: monumental-ruby uninstall versions..."
+                          , desc = "uninstall specified versions of Ruby"
+                          })
+               , ("use",
+                  Command { name = "use"
+                          , func = use
+                          , cmdUsage = "usage: monumental-ruby use version"
+                          , desc = "select the specific version of Ruby as cureent version"
+                          })
+               , ("list",
+                  Command { name = "list"
+                          , func = list
+                          , cmdUsage = "usage: monumental-ruby list"
+                          , desc = "list installed versions of Ruby"
+                          })
+               , ("help",
+                  Command { name = "help"
+                          , func = help
+                          , cmdUsage = "usage: monumental-ruby help [topic]"
+                          , desc = "show help"
+                          })
                ]
 
 doCmd :: CmdFunc

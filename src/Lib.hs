@@ -88,12 +88,19 @@ usage =
     , ""
     ]
     ++
-    [replicate 8 ' ' ++ name c ++ replicate (align c) ' ' ++ desc c | c <- Map.elems cmds]
+    [replicate indent ' ' ++ name c ++ replicate (align c) ' ' ++ desc c | c <- Map.elems cmds]
   where
+    indent :: Int
+    indent = 8
+
     longestNameLen :: Int
     longestNameLen = maximum . map length $ Map.keys cmds
+
+    minSpaces :: Int
+    minSpaces = 4
+
     align :: Command -> Int
-    align (Command {name = n}) = 4 + longestNameLen - length n
+    align (Command {name = n}) = minSpaces + longestNameLen - length n
 
 help :: CmdFunc
 help _ [] = putStrLn usage

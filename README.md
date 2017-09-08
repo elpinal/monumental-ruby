@@ -12,6 +12,8 @@ $ stack install
 
 ## Examples
 
+Note that the executables will be installed in `$HOME/.monumental-ruby/bin`.
+
 ```bash
 $ monumental-ruby install v2_3_4
 ```

@@ -112,7 +112,7 @@ build root version =
              exitFailure
 
 ignoreNotExist :: IOError -> IO ()
-ignoreNotExist e = unless (isDoesNotExistError e) (throw e)
+ignoreNotExist = unless . isDoesNotExistError <*> throw
 
 uninstall :: Command
 uninstall _ [] = failWith "usage: monumental-ruby uninstall versions..."

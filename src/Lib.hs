@@ -85,7 +85,6 @@ usage =
           , "        use          select the specific version of Ruby as cureent version"
           , "        list         list installed versions of Ruby"
           , "        help         show help"
-          , ""
           ]
 
 help :: CmdFunc

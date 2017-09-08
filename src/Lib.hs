@@ -38,16 +38,13 @@ parseFlag :: State [String] [Flag]
 parseFlag = do
   args <- get
   case args of
-    (x:xs) ->
-      case x of
-        "-h" -> do
-          put xs
-          flags <- parseFlag
-          return $ Help : flags
-        _ -> do
-          put args
-          return []
-    _ -> return []
+    ("-h":xs) -> do
+      put xs
+      flags <- parseFlag
+      return $ Help : flags
+    _ -> do
+      put args
+      return []
 
 type CmdFunc = FilePath -> [String] -> IO ()
 

@@ -2,6 +2,7 @@ module Lib where
 
 import Control.Exception.Safe
 import Control.Monad
+import qualified Data.Map.Lazy as Map
 import System.Directory
 import System.Environment
 import System.Exit
@@ -26,21 +27,51 @@ run = do
 failWith :: String -> IO ()
 failWith msg = hPutStrLn stderr msg >> exitFailure
 
-type Command = FilePath -> [String] -> IO ()
+type CmdFunc = FilePath -> [String] -> IO ()
 
-doCmd :: Command
+data Command = Command { name :: String
+                       , func :: CmdFunc
+                       , cmdUsage :: String
+                       , desc :: String
+                       }
+
+cmds :: Map.Map String Command
+cmds =
+  Map.fromList [ ("install", Command { name = "install"
+                                     , func = install
+                                     , cmdUsage = "usage: monumental-ruby install versions..."
+                                     , desc = "install specified versions of Ruby"
+                                     })
+               , ("uninstall", Command { name = "uninstall"
+                                       , func = uninstall
+                                       , cmdUsage = "usage: monumental-ruby uninstall versions..."
+                                       , desc = "uninstall specified versions of Ruby"
+                                       })
+               , ("use", Command { name = "use"
+                                 , func = use
+                                 , cmdUsage = "usage: monumental-ruby use version"
+                                 , desc = "select the specific version of Ruby as cureent version"
+                                 })
+               , ("list", Command { name = "list"
+                                  , func = list
+                                  , cmdUsage = "usage: monumental-ruby list"
+                                  , desc = "list installed versions of Ruby"
+                                  })
+               , ("help", Command { name = "help"
+                                  , func = help
+                                  , cmdUsage = "usage: monumental-ruby help [topic]"
+                                  , desc = "show help"
+                                  })
+               ]
+
+doCmd :: CmdFunc
 doCmd _ [] = putStrLn usage >> exitFailure
 doCmd root (name:args) = cmd name root args
   where
-    cmd :: String -> Command
-    cmd "install" = install
-    cmd "uninstall" = uninstall
-    cmd "use" = use
-    cmd "list" = list
-    cmd "help" = help
-    cmd x = nocmd x
+    cmd :: String -> CmdFunc
+    cmd x = maybe (nocmd x) func $ Map.lookup x cmds
 
-nocmd :: String -> Command
+nocmd :: String -> CmdFunc
 nocmd x _ _ = failWith $ "monumental-ruby: no such command " ++ show x
 
 usage :: String
@@ -57,7 +88,7 @@ usage =
           , ""
           ]
 
-help :: Command
+help :: CmdFunc
 help _ [] = putStrLn usage
 help _ [topic] = helpOf topic
   where
@@ -75,7 +106,7 @@ help _ _ =
             , "Too many arguments given."
             ]
 
-install :: Command
+install :: CmdFunc
 install _ [] = failWith "install: 1 or more arguments required"
 install root versions = do
   createDirectoryIfMissing True $ root </> "repo"
@@ -114,7 +145,7 @@ build root version =
 ignoreNotExist :: IOError -> IO ()
 ignoreNotExist = unless . isDoesNotExistError <*> throw
 
-uninstall :: Command
+uninstall :: CmdFunc
 uninstall _ [] = failWith "usage: monumental-ruby uninstall versions..."
 uninstall root versions =
   mapM_ remove [root </> dir </> v | v <- versions, dir <- ["repo", "ruby"]]
@@ -122,7 +153,7 @@ uninstall root versions =
       remove :: FilePath -> IO ()
       remove = flip catch ignoreNotExist . removeDirectoryRecursive
 
-use :: Command
+use :: CmdFunc
 use _ [] = failWith "use: 1 argument required"
 use root [version] = do
   exists <- doesDirectoryExist src
@@ -138,7 +169,7 @@ use root [version] = do
       dest = root </> "bin"
 use _ _ = failWith "use: too many arguments"
 
-list :: Command
+list :: CmdFunc
 list root [] = flip catch ignoreNotExist $ do
   dirs <- listDirectory $ root </> "ruby"
   mapM_ putStrLn dirs

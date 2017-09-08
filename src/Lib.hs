@@ -76,16 +76,19 @@ nocmd x _ _ = failWith $ "monumental-ruby: no such command " ++ show x
 
 usage :: String
 usage =
-  unlines [ "Monumental-ruby is a tool for managing various versions of Ruby."
-          , ""
-          , "Usage:"
-          , ""
-          , "        install      install specified versions of Ruby"
-          , "        uninstall    uninstall specified versions of Ruby"
-          , "        use          select the specific version of Ruby as cureent version"
-          , "        list         list installed versions of Ruby"
-          , "        help         show help"
-          ]
+  unlines $
+    [ "Monumental-ruby is a tool for managing various versions of Ruby."
+    , ""
+    , "Usage:"
+    , ""
+    ]
+    ++
+    [replicate 8 ' ' ++ name c ++ replicate (align c) ' ' ++ desc c | c <- Map.elems cmds]
+  where
+    longestNameLen :: Int
+    longestNameLen = maximum . map length $ Map.keys cmds
+    align :: Command -> Int
+    align (Command {name = n}) = 4 + longestNameLen - length n
 
 help :: CmdFunc
 help _ [] = putStrLn usage

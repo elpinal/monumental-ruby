@@ -2,6 +2,7 @@ module Lib where
 
 import Control.Exception.Safe
 import Control.Monad
+import Control.Monad.State.Lazy
 import qualified Data.Map.Lazy as Map
 import System.Directory
 import System.Environment
@@ -21,11 +22,32 @@ getRootPath = flip combine ".monumental-ruby" <$> getHomeDirectory
 run :: IO ()
 run = do
   root <- getRootPath
-  args <- getArgs
-  doCmd root args
+  xs <- getArgs
+  let (flags, args) = runState parseFlag xs
+  if Help `elem` flags then
+    help root args
+  else
+    doCmd root args
 
 failWith :: String -> IO ()
 failWith msg = hPutStrLn stderr msg >> exitFailure
+
+data Flag = Help deriving (Eq, Ord, Show)
+
+parseFlag :: State [String] [Flag]
+parseFlag = do
+  args <- get
+  case args of
+    (x:xs) ->
+      case x of
+        "-h" -> do
+          put xs
+          flags <- parseFlag
+          return $ Help : flags
+        _ -> do
+          put args
+          return []
+    _ -> return []
 
 type CmdFunc = FilePath -> [String] -> IO ()
 

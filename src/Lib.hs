@@ -35,7 +35,10 @@ run = do
 failWith :: String -> IO ()
 failWith msg = hPutStrLn stderr msg >> exitFailure
 
-data Flag = Help deriving (Eq, Ord, Show)
+data Flag =
+    Help
+  | Root FilePath
+    deriving (Eq, Ord, Show)
 
 parseFlag :: ExceptT String (State [String]) [Flag]
 parseFlag = do
@@ -45,6 +48,12 @@ parseFlag = do
       put xs
       flags <- parseFlag
       return $ Help : flags
+    ("-root":xs) -> do
+      when (length xs == 0)
+           (throwError "-root: need argument")
+      put $ tail xs
+      flags <- parseFlag
+      return $ Root (head xs) : flags
     (('-':flag):_) -> throwError $ "no such flag: " ++ show flag
     _ -> do
       put args

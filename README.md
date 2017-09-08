@@ -10,6 +10,28 @@ In this repository, execute it:
 $ stack install
 ```
 
+## Examples
+
+```bash
+$ monumental-ruby install v2_3_4
+```
+
+```bash
+$ monumental-ruby list
+```
+
+```bash
+$ monumental-ruby use v2_3_4
+```
+
+```bash
+$ monumental-ruby uninstall v2_3_4
+```
+
+```bash
+$ monumental-ruby help
+```
+
 ## Author
 
 [elpinal](https://github.com/elpinal)

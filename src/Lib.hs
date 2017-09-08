@@ -92,12 +92,10 @@ help _ [] = putStrLn usage
 help _ [topic] = helpOf topic
   where
     helpOf :: String -> IO ()
-    helpOf "install" = putStrLn "usage: monumental-ruby install versions..."
-    helpOf "uninstall" = putStrLn "usage: monumental-ruby uninstall versions..."
-    helpOf "use" = putStrLn "usage: monumental-ruby use version"
-    helpOf "list" = putStrLn "usage: monumental-ruby list"
-    helpOf "help" = putStrLn "usage: monumental-ruby help [topic]"
-    helpOf topic = failWith $ "unknown help topic " ++ show topic ++ ". Run 'monumental-ruby help'."
+    helpOf topic = maybe (noTopic topic) (putStrLn . cmdUsage) $ Map.lookup topic cmds
+
+    noTopic :: String -> IO ()
+    noTopic topic = failWith $ "unknown help topic " ++ show topic ++ ". Run 'monumental-ruby help'."
 help _ _ =
   failWith $
     unlines [ "usage: monumental-ruby help command"

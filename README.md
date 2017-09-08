@@ -4,7 +4,7 @@ Monumental-ruby is a management tool for various versions of Ruby.
 
 ## Install
 
-In this repository, execute it:
+In this repository, execute it with [Stack](http://haskellstack.org):
 
 ```bash
 $ stack install

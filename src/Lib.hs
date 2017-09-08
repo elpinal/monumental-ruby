@@ -116,14 +116,11 @@ ignoreNotExist = unless . isDoesNotExistError <*> throw
 
 uninstall :: Command
 uninstall _ [] = failWith "usage: monumental-ruby uninstall versions..."
-uninstall root versions = mapM_ remove versions
+uninstall root versions =
+  mapM_ remove [root </> dir </> v | v <- versions, dir <- ["repo", "ruby"]]
     where
       remove :: FilePath -> IO ()
-      remove v = mapM_ (removeDirs v) ["repo", "ruby"]
-
-      removeDirs :: FilePath -> FilePath -> IO ()
-      removeDirs v dir =
-        removeDirectoryRecursive (root </> dir </> v) `catch` ignoreNotExist
+      remove = flip catch ignoreNotExist . removeDirectoryRecursive
 
 use :: Command
 use _ [] = failWith "use: 1 argument required"

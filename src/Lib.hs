@@ -2,6 +2,7 @@ module Lib where
 
 import Control.Exception.Safe
 import Control.Monad
+import Control.Monad.Except
 import Control.Monad.State.Lazy
 import qualified Data.Map.Lazy as Map
 import System.Directory
@@ -23,18 +24,20 @@ run :: IO ()
 run = do
   root <- getRootPath
   xs <- getArgs
-  let (flags, args) = runState parseFlag xs
-  if Help `elem` flags then
-    help root args
-  else
-    doCmd root args
+  let (flags, args) = runState (runExceptT parseFlag) xs
+  case flags of
+    Left msg -> failWith msg
+    Right fs -> if Help `elem` fs then
+                  help root args
+                else
+                  doCmd root args
 
 failWith :: String -> IO ()
 failWith msg = hPutStrLn stderr msg >> exitFailure
 
 data Flag = Help deriving (Eq, Ord, Show)
 
-parseFlag :: State [String] [Flag]
+parseFlag :: ExceptT String (State [String]) [Flag]
 parseFlag = do
   args <- get
   case args of
@@ -42,6 +45,7 @@ parseFlag = do
       put xs
       flags <- parseFlag
       return $ Help : flags
+    (('-':flag):_) -> throwError $ "no such flag: " ++ show flag
     _ -> do
       put args
       return []

@@ -131,6 +131,8 @@ use root [version] = do
   unless exists $
          failWith $ "use: not installed: " ++ show version
   removeDirectoryLink dest
+    `catch` \e -> unless (isDoesNotExistError e)
+                  (throw e)
   createSymbolicLink src dest
     where
       src :: FilePath

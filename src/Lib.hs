@@ -111,9 +111,8 @@ build root version =
         when (code /= ExitSuccess)
              exitFailure
 
-handler :: IOError -> IO ()
-handler e = unless (isDoesNotExistError e)
-            (throw e)
+ignoreNotExist :: IOError -> IO ()
+ignoreNotExist e = unless (isDoesNotExistError e) (throw e)
 
 uninstall :: Command
 uninstall _ [] = failWith "usage: monumental-ruby uninstall versions..."
@@ -124,7 +123,7 @@ uninstall root versions = mapM_ remove versions
 
       removeDirs :: FilePath -> FilePath -> IO ()
       removeDirs v dir =
-        removeDirectoryRecursive (root </> dir </> v) `catch` handler
+        removeDirectoryRecursive (root </> dir </> v) `catch` ignoreNotExist
 
 use :: Command
 use _ [] = failWith "use: 1 argument required"
@@ -132,7 +131,7 @@ use root [version] = do
   exists <- doesDirectoryExist src
   unless exists $
          failWith $ "use: not installed: " ++ show version
-  removeDirectoryLink dest `catch` handler
+  removeDirectoryLink dest `catch` ignoreNotExist
   createSymbolicLink src dest
     where
       src :: FilePath
@@ -143,7 +142,7 @@ use root [version] = do
 use _ _ = failWith "use: too many arguments"
 
 list :: Command
-list root [] = flip catch handler $ do
+list root [] = flip catch ignoreNotExist $ do
   dirs <- listDirectory $ root </> "ruby"
   mapM_ putStrLn dirs
 list _ _ = failWith "usage: list"

@@ -36,10 +36,7 @@ run' home xs = do
   fs <- ExceptT $ return $ flags
   let k = runExceptT (getRoot fs)
   root <- ExceptT $ return $ maybe (return $ rootPath home) (fmap rootPath) k
-  if Help `elem` fs then
-    liftIO $ help root args
-  else
-    liftIO $ doCmd root args
+  liftIO $ (helpORCmd fs) root args
   where
     getRoot :: [Flag] -> ExceptT String Maybe FilePath
     getRoot fs =
@@ -51,6 +48,10 @@ run' home xs = do
     isRoot :: Flag -> Bool
     isRoot (Root _) = True
     isRoot _ = False
+
+    helpORCmd :: [Flag] -> CmdFunc
+    helpORCmd fs | Help `elem` fs = help
+    helpORCmd _ = doCmd
 
 failWith :: String -> IO a
 failWith msg = hPutStrLn stderr msg >> exitFailure

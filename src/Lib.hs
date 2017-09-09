@@ -34,8 +34,7 @@ run' :: FilePath -> [String] -> ExceptT String IO ()
 run' home xs = do
   let (flags, args) = runState (runExceptT parseFlag) xs
   fs <- ExceptT . return $ flags
-  let k = runExceptT $ getRoot fs
-  root <- ExceptT . return $ maybe (return $ rootPath home) (fmap rootPath) k
+  root <- mapExceptT setRoot $ getRoot fs
   liftIO $ helpORCmd fs root args
   where
     getRoot :: [Flag] -> ExceptT String Maybe FilePath
@@ -52,6 +51,10 @@ run' home xs = do
     helpORCmd :: [Flag] -> CmdFunc
     helpORCmd fs | Help `elem` fs = help
     helpORCmd _ = doCmd
+
+    setRoot :: Maybe (Either String FilePath) -> IO (Either String FilePath)
+    setRoot Nothing = return . Right $ rootPath home
+    setRoot (Just e) = return $ rootPath <$> e
 
 failWith :: String -> IO a
 failWith msg = hPutStrLn stderr msg >> exitFailure

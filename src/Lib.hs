@@ -35,13 +35,7 @@ run' home xs = do
   let (flags, args) = runState (runExceptT parseFlag) xs
   fs <- ExceptT $ return $ flags
   let k = runExceptT (getRoot fs)
-  root <- do
-    if isNothing k then
-      return $ rootPath home
-    else
-      case fromJust k of
-        Left msg -> liftIO $ failWith msg
-        Right p -> return $ rootPath p
+  root <- ExceptT $ return $ maybe (return $ rootPath home) (fmap rootPath) k
   if Help `elem` fs then
     liftIO $ help root args
   else

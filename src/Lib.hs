@@ -65,21 +65,21 @@ data Flag =
     deriving (Eq, Ord, Show)
 
 parseFlag :: ExceptT String (State [String]) [Flag]
-parseFlag = do
-  args <- get
-  case args of
-    ("-h":xs) -> do
+parseFlag = get >>= parse
+  where
+    parse :: [String] -> ExceptT String (State [String]) [Flag]
+    parse ("-h":xs) = do
       put xs
       flags <- parseFlag
       return $ Help : flags
-    ("-root":xs) -> do
+    parse ("-root":xs) = do
       when (length xs == 0)
            (throwError "-root: need argument")
       put $ tail xs
       flags <- parseFlag
       return $ Root (head xs) : flags
-    (('-':flag):_) -> throwError $ "no such flag: " ++ show flag
-    _ -> do
+    parse (('-':flag):_) = throwError $ "no such flag: " ++ show flag
+    parse args = do
       put args
       return []
 

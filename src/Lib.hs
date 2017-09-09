@@ -23,12 +23,16 @@ rootPath = flip combine ".monumental-ruby"
 
 run :: IO ()
 run = do
-  xs <- getArgs
+  args <- getArgs
+  home <- getHomeDirectory
+  run' home args
+
+run' :: FilePath -> [String] -> IO ()
+run' home xs = do
   let (flags, args) = runState (runExceptT parseFlag) xs
   case flags of
     Left msg -> failWith msg
     Right fs -> do
-      home <- getHomeDirectory
       let k = runExceptT (getRoot fs)
       root <- do
         if isNothing k then

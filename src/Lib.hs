@@ -52,6 +52,7 @@ run' home xs = do
         [Root p] -> return p
         [] -> fail "no root specified"
         _ -> throwError "duplicated -root flags"
+
     isRoot :: Flag -> Bool
     isRoot (Root _) = True
     isRoot _ = False

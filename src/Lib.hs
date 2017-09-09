@@ -25,26 +25,27 @@ run :: IO ()
 run = do
   args <- getArgs
   home <- getHomeDirectory
-  run' home args
+  result <- runExceptT $ run' home args
+  case result of
+    Left msg -> failWith msg
+    _ -> return ()
 
-run' :: FilePath -> [String] -> IO ()
+run' :: FilePath -> [String] -> ExceptT String IO ()
 run' home xs = do
   let (flags, args) = runState (runExceptT parseFlag) xs
-  case flags of
-    Left msg -> failWith msg
-    Right fs -> do
-      let k = runExceptT (getRoot fs)
-      root <- do
-        if isNothing k then
-          return $ rootPath home
-        else
-          case fromJust k of
-            Left msg -> failWith msg
-            Right p -> return $ rootPath p
-      if Help `elem` fs then
-        help root args
-      else
-        doCmd root args
+  fs <- ExceptT $ return $ flags
+  let k = runExceptT (getRoot fs)
+  root <- do
+    if isNothing k then
+      return $ rootPath home
+    else
+      case fromJust k of
+        Left msg -> liftIO $ failWith msg
+        Right p -> return $ rootPath p
+  if Help `elem` fs then
+    liftIO $ help root args
+  else
+    liftIO $ doCmd root args
   where
     getRoot :: [Flag] -> ExceptT String Maybe FilePath
     getRoot fs =

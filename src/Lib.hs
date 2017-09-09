@@ -5,6 +5,7 @@ import Control.Monad
 import Control.Monad.Except
 import Control.Monad.State.Lazy
 import qualified Data.Map.Lazy as Map
+import Data.Maybe
 import System.Directory
 import System.Environment
 import System.Exit
@@ -17,22 +18,41 @@ import System.Process
 repoURI :: String
 repoURI = "https://github.com/ruby/ruby"
 
-getRootPath :: IO FilePath
-getRootPath = flip combine ".monumental-ruby" <$> getHomeDirectory 
+rootPath :: FilePath -> FilePath
+rootPath = flip combine ".monumental-ruby"
 
 run :: IO ()
 run = do
-  root <- getRootPath
   xs <- getArgs
   let (flags, args) = runState (runExceptT parseFlag) xs
   case flags of
     Left msg -> failWith msg
-    Right fs -> if Help `elem` fs then
-                  help root args
-                else
-                  doCmd root args
+    Right fs -> do
+      home <- getHomeDirectory
+      let k = runExceptT (getRoot fs)
+      root <- do
+        if isNothing k then
+          return $ rootPath home
+        else
+          case fromJust k of
+            Left msg -> failWith msg
+            Right p -> return $ rootPath p
+      if Help `elem` fs then
+        help root args
+      else
+        doCmd root args
+  where
+    getRoot :: [Flag] -> ExceptT String Maybe FilePath
+    getRoot fs =
+      case filter isRoot fs of
+        [Root p] -> return p
+        [] -> fail "no root specified"
+        _ -> throwError "duplicated -root flags"
+    isRoot :: Flag -> Bool
+    isRoot (Root _) = True
+    isRoot _ = False
 
-failWith :: String -> IO ()
+failWith :: String -> IO a
 failWith msg = hPutStrLn stderr msg >> exitFailure
 
 data Flag =

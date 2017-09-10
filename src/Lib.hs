@@ -144,6 +144,13 @@ usage =
     ]
     ++
     [replicate indent ' ' ++ name c ++ replicate (align c) ' ' ++ desc c | c <- Map.elems cmds]
+    ++
+    [ ""
+    , "Flags:"
+    , ""
+    ]
+    ++
+    [replicate indent ' ' ++ f | f <- ["-h", "-root"]]
   where
     indent :: Int
     indent = 8

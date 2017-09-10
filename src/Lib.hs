@@ -150,7 +150,7 @@ usage =
     , ""
     ]
     ++
-    [replicate indent ' ' ++ f ++ replicate (minSpaces + (maximum . map length) (Map.keys cmds) - length f) ' ' ++ d | (f, d) <- fs]
+    [replicate indent ' ' ++ f ++ replicate (alignF f) ' ' ++ d | (f, d) <- fs]
   where
     indent :: Int
     indent = 8
@@ -168,6 +168,9 @@ usage =
     fs = [ ("-h", "show this help")
          , ("-root", "set root directory")
          ]
+
+    alignF :: String -> Int
+    alignF f = minSpaces + longestNameLen - length f
 
 help :: CmdFunc
 help _ [] = putStrLn usage

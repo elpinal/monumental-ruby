@@ -5,7 +5,6 @@ import Control.Monad
 import Control.Monad.Except
 import Control.Monad.State.Lazy
 import qualified Data.Map.Lazy as Map
-import Data.Maybe
 import System.Directory
 import System.Environment
 import System.Exit

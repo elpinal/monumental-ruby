@@ -166,13 +166,10 @@ usage =
 
 help :: CmdFunc
 help _ [] = putStrLn usage
-help _ [topic] = helpOf topic
+help _ [topic] = maybe noTopic (putStrLn . cmdUsage) $ Map.lookup topic cmds
   where
-    helpOf :: String -> IO ()
-    helpOf topic = maybe (noTopic topic) (putStrLn . cmdUsage) $ Map.lookup topic cmds
-
-    noTopic :: String -> IO ()
-    noTopic topic = failWith $ "unknown help topic " ++ show topic ++ ". Run 'monumental-ruby help'."
+    noTopic :: IO ()
+    noTopic = failWith $ "unknown help topic " ++ show topic ++ ". Run 'monumental-ruby help'."
 help _ _ =
   failWith $
     unlines [ "usage: monumental-ruby help command"

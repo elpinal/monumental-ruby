@@ -150,7 +150,7 @@ usage =
     , ""
     ]
     ++
-    [replicate indent ' ' ++ f | f <- ["-h", "-root"]]
+    [replicate indent ' ' ++ f ++ replicate (minSpaces + (maximum . map (length . fst)) fs - length f) ' ' ++ d | (f, d) <- fs]
   where
     indent :: Int
     indent = 8
@@ -163,6 +163,11 @@ usage =
 
     align :: Command -> Int
     align Command {name = n} = minSpaces + longestNameLen - length n
+
+    fs :: [(String, String)]
+    fs = [ ("-h", "show this help")
+         , ("-root", "set root directory")
+         ]
 
 help :: CmdFunc
 help _ [] = putStrLn usage

@@ -143,14 +143,14 @@ usage =
     , ""
     ]
     ++
-    [replicate indent ' ' ++ name c ++ replicate (align c) ' ' ++ desc c | c <- Map.elems cmds]
+    [replicate indent ' ' ++ name c ++ replicate (align (name c)) ' ' ++ desc c | c <- Map.elems cmds]
     ++
     [ ""
     , "Flags:"
     , ""
     ]
     ++
-    [replicate indent ' ' ++ f ++ replicate (alignF f) ' ' ++ d | (f, d) <- fs]
+    [replicate indent ' ' ++ f ++ replicate (align f) ' ' ++ d | (f, d) <- fs]
   where
     indent :: Int
     indent = 8
@@ -161,16 +161,13 @@ usage =
     minSpaces :: Int
     minSpaces = 1
 
-    align :: Command -> Int
-    align Command {name = n} = minSpaces + longestNameLen - length n
+    align :: String -> Int
+    align s = minSpaces + longestNameLen - length s
 
     fs :: [(String, String)]
     fs = [ ("-h", "show this help")
          , ("-root", "set root directory")
          ]
-
-    alignF :: String -> Int
-    alignF f = minSpaces + longestNameLen - length f
 
 help :: CmdFunc
 help _ [] = putStrLn usage

@@ -53,7 +53,7 @@ run' home xs = do
 
     setRoot :: Maybe (Either String FilePath) -> IO (Either String FilePath)
     setRoot Nothing = return . Right $ rootPath home
-    setRoot (Just e) = return $ rootPath <$> e
+    setRoot (Just e) = return e
 
 failWith :: String -> IO a
 failWith msg = hPutStrLn stderr msg >> exitFailure

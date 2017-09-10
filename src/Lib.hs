@@ -150,7 +150,7 @@ usage =
     , ""
     ]
     ++
-    [replicate indent ' ' ++ f ++ replicate (minSpaces + (maximum . map (length . fst)) fs - length f) ' ' ++ d | (f, d) <- fs]
+    [replicate indent ' ' ++ f ++ replicate (minSpaces + (maximum . map length) (Map.keys cmds) - length f) ' ' ++ d | (f, d) <- fs]
   where
     indent :: Int
     indent = 8
@@ -159,7 +159,7 @@ usage =
     longestNameLen = maximum . map length $ Map.keys cmds
 
     minSpaces :: Int
-    minSpaces = 4
+    minSpaces = 1
 
     align :: Command -> Int
     align Command {name = n} = minSpaces + longestNameLen - length n

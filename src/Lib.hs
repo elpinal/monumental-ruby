@@ -139,7 +139,7 @@ usage =
   unlines $
     [ "Monumental-ruby is a tool for managing various versions of Ruby."
     , ""
-    , "Usage:"
+    , "Commands:"
     , ""
     ]
     ++

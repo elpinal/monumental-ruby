@@ -139,6 +139,10 @@ usage =
   unlines $
     [ "Monumental-ruby is a tool for managing various versions of Ruby."
     , ""
+    , "Usage:"
+    , ""
+    , replicate indent ' ' ++ "monumental-ruby command [arguments]"
+    , ""
     , "Commands:"
     , ""
     ]

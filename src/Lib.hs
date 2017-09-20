@@ -193,17 +193,19 @@ install root versions = do
   mapM_ (clone root) versions
   mapM_ (build root) versions
 
-getDest :: FilePath -> String -> FilePath
+type Version = String
+
+getDest :: FilePath -> Version -> FilePath
 getDest root version = foldl1 combine [root, "repo", version]
 
-clone :: FilePath -> String -> IO ()
+clone :: FilePath -> Version -> IO ()
 clone root version = do
   let dest = getDest root version
   exists <- doesDirectoryExist dest
   unless exists $
          callProcess "git" ["clone", "--depth", "1", "--branch", version, repoURI, dest]
 
-build :: FilePath -> String -> IO ()
+build :: FilePath -> Version -> IO ()
 build root version =
   mapM_ exec
         [ ("autoconf", [])
@@ -268,7 +270,7 @@ list root [] = flip catch ignoreNotExist $ do
     ]
 list _ _ = failWith "usage: list"
 
-getActive :: FilePath -> IO String
+getActive :: FilePath -> IO Version
 getActive root = return . takeFileName . takeDirectory <=< readSymbolicLink $ root </> "bin"
 
 highlight :: String -> String

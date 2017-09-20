@@ -30,3 +30,7 @@ spec = do
       let (flags, args) = runState (runExceptT parseFlag) xs
       isLeft flags `shouldBe` True
       args `shouldBe` ["-no-such-flag", "arg"]
+
+  describe "highlight" $ do
+    it "highlights string" $ do
+      highlight "string" `shouldBe` "\ESC[1mstring\ESC[0m"

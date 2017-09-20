@@ -141,7 +141,7 @@ usage =
     , ""
     , "Usage:"
     , ""
-    , replicate indent ' ' ++ "monumental-ruby command [arguments]"
+    , replicate indent ' ' ++ "monumental-ruby [flags] command [arguments]"
     , ""
     , "Commands:"
     , ""

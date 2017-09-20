@@ -17,12 +17,15 @@ import System.IO.Error
 import System.Posix.Files
 import System.Process
 
+-- |The default repository URI to install.
 repoURI :: String
 repoURI = "https://github.com/ruby/ruby"
 
+-- |Joins a directory with @".monumental-ruby"@.
 rootPath :: FilePath -> FilePath
 rootPath = flip combine ".monumental-ruby"
 
+-- |The main function for the executable.
 run :: IO ()
 run = do
   args <- getArgs
@@ -58,9 +61,11 @@ run' home xs = do
     setRoot Nothing = return . Right $ rootPath home
     setRoot (Just e) = return e
 
+-- |Prints an error message to @stderr@ and exits with a failure code.
 failWith :: String -> IO a
 failWith msg = hPutStrLn stderr msg >> exitFailure
 
+-- |Represents a global flag.
 data Flag =
     Help
   | Root FilePath

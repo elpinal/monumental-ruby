@@ -254,3 +254,6 @@ list root [] = flip catch ignoreNotExist $ do
   dirs <- listDirectory $ root </> "ruby"
   mapM_ putStrLn dirs
 list _ _ = failWith "usage: list"
+
+getActive :: FilePath -> IO String
+getActive root = takeFileName . takeDirectory <$> readSymbolicLink $ root </> "bin" 

@@ -252,10 +252,10 @@ use _ _ = failWith "use: too many arguments"
 list :: CmdFunc
 list root [] = flip catch ignoreNotExist $ do
   dirs <- listDirectory $ root </> "ruby"
-  putStrLn $ unlines ["installed:"]
+  putStrLn $ unlines ["installed versions:"]
   mapM_ putStrLn dirs
   a <- getActive root
-  putStrLn $ unlines ["", "active:", "", a]
+  putStrLn $ unlines ["", "active version:", "", a]
 list _ _ = failWith "usage: list"
 
 getActive :: FilePath -> IO String

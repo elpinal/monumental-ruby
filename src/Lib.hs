@@ -135,7 +135,9 @@ doCmd root (name:args) = cmd name root args
     cmd x = maybe (nocmd x) func $ Map.lookup x cmds
 
 nocmd :: String -> CmdFunc
-nocmd x _ _ = failWith $ "monumental-ruby: no such command " ++ show x
+nocmd x _ _ = failWith $
+  "monumental-ruby: no such command " ++ show x ++ "\n" ++
+  "Run 'monumental-ruby help' for usage."
 
 usage :: String
 usage =

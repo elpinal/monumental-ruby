@@ -255,7 +255,7 @@ list root [] = flip catch ignoreNotExist $ do
   putStrLn $ unlines ["installed:"]
   mapM_ putStrLn dirs
   a <- getActive root
-  mapM_ putStrLn ["", "active:", "", a, ""]
+  putStrLn $ unlines ["", "active:", "", a]
 list _ _ = failWith "usage: list"
 
 getActive :: FilePath -> IO String

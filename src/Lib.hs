@@ -252,6 +252,7 @@ use _ _ = failWith "use: too many arguments"
 list :: CmdFunc
 list root [] = flip catch ignoreNotExist $ do
   dirs <- listDirectory $ root </> "ruby"
+  putStrLn $ unlines ["installed:"]
   mapM_ putStrLn dirs
   a <- getActive root
   mapM_ putStrLn ["", "active:", "", a, ""]

@@ -77,7 +77,7 @@ parseFlag = get >>= parse
       put $ tail xs
       flags <- parseFlag
       return $ Root (head xs) : flags
-    parse (('-':flag):_) = throwError $ "no such flag: " ++ show flag
+    parse (flag@('-':_):_) = throwError $ "no such flag: " ++ show flag
     parse args = do
       put args
       return []

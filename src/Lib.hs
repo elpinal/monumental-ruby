@@ -254,11 +254,7 @@ list root [] = flip catch ignoreNotExist $ do
   dirs <- listDirectory $ root </> "ruby"
   mapM_ putStrLn dirs
   a <- getActive root
-  putStrLn ""
-  putStrLn "active:"
-  putStrLn ""
-  putStrLn a
-  putStrLn ""
+  mapM_ putStrLn ["", "active:", "", a, ""]
 list _ _ = failWith "usage: list"
 
 getActive :: FilePath -> IO String

@@ -269,7 +269,7 @@ use root [version] = do
 use _ _ = failWith "use: too many arguments"
 
 list :: CmdFunc
-list root [] = flip catch ignoreNotExist $ do
+list root [] = do
   dirs <- runMaybeT . listDir $ root </> "ruby"
   putStrLn . highlight $ unlines
     [ "installed versions"

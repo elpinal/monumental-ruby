@@ -294,10 +294,8 @@ class Monad m => MonadSym m where
   listDir :: FilePath -> MaybeT m [FilePath]
 
 instance MonadSym IO where
-  readSym p = MaybeT $ fmap Just (readSymbolicLink p)
-                         `catch` handleNotExistIO
-  listDir p = MaybeT $ fmap Just (listDirectory p)
-                         `catch` handleNotExistIO
+  readSym p = MaybeT $ fmap Just (readSymbolicLink p) `catch` handleNotExistIO
+  listDir p = MaybeT $ fmap Just (listDirectory p) `catch` handleNotExistIO
 
 handleNotExistIO :: IOError -> IO (Maybe a)
 handleNotExistIO e = return $
@@ -307,10 +305,7 @@ handleNotExistIO e = return $
     throw e
 
 getActive :: MonadSym m => FilePath -> MaybeT m Version
-getActive root = f <$> readSym (root </> "bin")
-  where
-    f :: FilePath -> Version
-    f = takeFileName . takeDirectory
+getActive root = takeFileName . takeDirectory <$> readSym (root </> "bin")
 
 highlight :: String -> String
 highlight xs = "\ESC[1m" ++ xs ++ "\ESC[0m"

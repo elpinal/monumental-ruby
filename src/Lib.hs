@@ -271,22 +271,23 @@ use _ _ = failWith "use: too many arguments"
 list :: CmdFunc
 list root [] = fmap (const ()) $ runMaybeT $ do
   dirs <- listDir $ root </> "ruby"
-  liftIO $ putStrLn . highlight $ unlines
-    [ "installed versions"
-    , "------------------"
-    ]
-  liftIO $ mapM_ putStrLn dirs
-
-  liftIO $ putStrLn ""
+  liftIO $ mapM_ putStrLn $
+    (highlight . unlines)
+      [ "installed versions"
+      , "------------------"
+      ]
+    : dirs
+    ++ [""]
 
   a <- getActive root
-  liftIO $ putStrLn . highlight $ unlines
-    [ "active version"
-    , "--------------"
+  liftIO $ mapM_ putStrLn $
+    [ highlight . unlines $
+        [ "active version"
+        , "--------------"
+        ]
+    , a
+    , ""
     ]
-  liftIO $ putStrLn a
-
-  liftIO $ putStrLn ""
 list _ _ = failWith "usage: list"
 
 class Monad m => MonadSym m where

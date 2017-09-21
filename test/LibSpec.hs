@@ -30,12 +30,9 @@ instance MonadSym TestSym where
   readSym p = MaybeT . TestSym $ do
     m <- fmap symMap ask
     return $ Map.lookup p m
-  listDir p = TestSym $ do
+  listDir p = MaybeT . TestSym $ do
     m <- fmap dirMap ask
-    return $ Map.findWithDefault (f m) p m
-      where
-        f :: Map.Map FilePath [FilePath] -> a
-        f m = error $ "not found " ++ show p ++ " in " ++ show m
+    return $ Map.lookup p m
 
 data FileMap = FileMap
   { symMap :: Map.Map FilePath FilePath

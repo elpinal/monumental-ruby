@@ -270,12 +270,13 @@ use _ _ = failWith "use: too many arguments"
 
 list :: CmdFunc
 list root [] = flip catch ignoreNotExist $ do
-  dirs <- listDir $ root </> "ruby"
+  dirs <- runMaybeT . listDir $ root </> "ruby"
   putStrLn . highlight $ unlines
     [ "installed versions"
     , "------------------"
     ]
-  mapM_ putStrLn dirs
+  guard $ isJust dirs
+  mapM_ putStrLn (fromJust dirs)
   a <- runMaybeT $ getActive root
   when (isJust a) $
        putStrLn $ unlines
@@ -290,19 +291,20 @@ list _ _ = failWith "usage: list"
 
 class Monad m => MonadSym m where
   readSym :: FilePath -> MaybeT m FilePath
-  listDir :: FilePath -> m [FilePath]
+  listDir :: FilePath -> MaybeT m [FilePath]
 
 instance MonadSym IO where
   readSym p = MaybeT $ fmap Just (readSymbolicLink p)
-                         `catch` handle
-    where
-      handle :: IOError -> IO (Maybe a)
-      handle e = return $
-                   if isDoesNotExistError e then
-                     Nothing
-                   else
-                     throw e
-  listDir = listDirectory
+                         `catch` handleNotExistIO
+  listDir p = MaybeT $ fmap Just (listDirectory p)
+                         `catch` handleNotExistIO
+
+handleNotExistIO :: IOError -> IO (Maybe a)
+handleNotExistIO e = return $
+  if isDoesNotExistError e then
+    Nothing
+  else
+    throw e
 
 getActive :: MonadSym m => FilePath -> MaybeT m Version
 getActive root = f <$> readSym (root </> "bin")

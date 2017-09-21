@@ -27,8 +27,8 @@ instance Monad TestSym where
   (TestSym x) >>= f = TestSym $ x >>= (runTestSym . f)
 
 instance MonadSym TestSym where
-  readSym p = MaybeT . TestSym $ Map.lookup p <$> fmap symMap ask
-  listDir p = MaybeT . TestSym $ Map.lookup p <$> fmap dirMap ask
+  readSym p = MaybeT . TestSym $ Map.lookup p . symMap <$> ask
+  listDir p = MaybeT . TestSym $ Map.lookup p . dirMap <$> ask
 
 data FileMap = FileMap
   { symMap :: Map.Map FilePath FilePath

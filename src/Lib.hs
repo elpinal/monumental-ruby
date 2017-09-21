@@ -9,7 +9,6 @@ import Control.Monad.Except
 import Control.Monad.State.Lazy
 import Control.Monad.Trans.Maybe
 import qualified Data.Map.Lazy as Map
-import Data.Maybe
 import System.Directory
 import System.Environment
 import System.Exit

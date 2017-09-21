@@ -277,15 +277,16 @@ list root [] = fmap (const ()) $ runMaybeT $ do
     ]
   liftIO $ mapM_ putStrLn dirs
 
+  liftIO $ putStrLn ""
+
   a <- getActive root
-  liftIO $ putStrLn $ unlines
-    [""
-    , highlight
-      "active version\n\
-      \--------------"
-    , ""
-    , a
+  liftIO $ putStrLn . highlight $ unlines
+    [ "active version"
+    , "--------------"
     ]
+  liftIO $ putStrLn a
+
+  liftIO $ putStrLn ""
 list _ _ = failWith "usage: list"
 
 class Monad m => MonadSym m where

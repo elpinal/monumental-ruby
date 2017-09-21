@@ -68,4 +68,4 @@ spec = do
       let m = FileMap { symMap = Map.singleton "root/bin" "foo/bar/v2_3_4/baz"
                       , dirMap = Map.empty
                       }
-      runReader (runTestSym . runMaybeT $ (getActive "root")) m `shouldBe` Just "v2_3_4"
+      runReader (runTestSym . runMaybeT $ getActive "root") m `shouldBe` Just "v2_3_4"

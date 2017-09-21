@@ -24,7 +24,7 @@ instance Applicative TestSym where
   (TestSym f) <*> (TestSym x) = TestSym $ f <*> x
 
 instance Monad TestSym where
-  (TestSym x) >>= f = TestSym $ x >>= (runTestSym . f)
+  (TestSym x) >>= f = TestSym $ x >>= runTestSym . f
 
 instance MonadSym TestSym where
   readSym p = MaybeT . TestSym $ Map.lookup p . symMap <$> ask

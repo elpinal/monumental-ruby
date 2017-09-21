@@ -6,7 +6,9 @@ import Lib
 import Control.Monad.Except
 import Control.Monad.Reader
 import Control.Monad.State.Lazy
+import Control.Monad.Trans.Maybe
 import Data.Either
+import Data.Maybe
 import qualified Data.Map.Lazy as Map
 
 newtype TestSym a = TestSym (Reader FileMap a)
@@ -25,12 +27,9 @@ instance Monad TestSym where
   (TestSym x) >>= f = TestSym $ x >>= (runTestSym . f)
 
 instance MonadSym TestSym where
-  readSym p = TestSym $ do
+  readSym p = MaybeT . TestSym $ do
     m <- fmap symMap ask
-    return $ Map.findWithDefault (f m) p m
-      where
-        f :: Map.Map FilePath FilePath -> a
-        f m = error $ "not found " ++ show p ++ " in " ++ show m
+    return $ Map.lookup p m
   listDir p = TestSym $ do
     m <- fmap dirMap ask
     return $ Map.findWithDefault (f m) p m
@@ -76,4 +75,4 @@ spec = do
       let m = FileMap { symMap = Map.singleton "root/bin" "foo/bar/v2_3_4/baz"
                       , dirMap = Map.empty
                       }
-      runReader (runTestSym (getActive "root")) m `shouldBe` "v2_3_4"
+      runReader (runTestSym . runMaybeT $ (getActive "root")) m `shouldBe` Just "v2_3_4"

@@ -7,7 +7,9 @@ import Control.Exception.Safe
 import Control.Monad
 import Control.Monad.Except
 import Control.Monad.State.Lazy
+import Control.Monad.Trans.Maybe
 import qualified Data.Map.Lazy as Map
+import Data.Maybe
 import System.Directory
 import System.Environment
 import System.Exit
@@ -274,27 +276,39 @@ list root [] = flip catch ignoreNotExist $ do
     , "------------------"
     ]
   mapM_ putStrLn dirs
-  a <- getActive root
-  putStrLn $ unlines
-    [""
-    , highlight
-      "active version\n\
-      \--------------"
-    , ""
-    , a
-    ]
+  a <- runMaybeT $ getActive root
+  when (isJust a) $
+       putStrLn $ unlines
+         [""
+         , highlight
+           "active version\n\
+           \--------------"
+         , ""
+         , fromJust a
+         ]
 list _ _ = failWith "usage: list"
 
 class Monad m => MonadSym m where
-  readSym :: FilePath -> m FilePath
+  readSym :: FilePath -> MaybeT m FilePath
   listDir :: FilePath -> m [FilePath]
 
 instance MonadSym IO where
-  readSym = readSymbolicLink
+  readSym p = MaybeT $ fmap Just (readSymbolicLink p)
+                         `catch` handle 
+    where
+      handle :: IOError -> IO (Maybe a)
+      handle e = return $
+                   if isDoesNotExistError e then
+                     Nothing
+                   else
+                     throw e
   listDir = listDirectory
 
-getActive :: MonadSym m => FilePath -> m Version
-getActive root = return . takeFileName . takeDirectory <=< readSym $ root </> "bin"
+getActive :: MonadSym m => FilePath -> MaybeT m Version
+getActive root = readSym (root </> "bin") >>= f
+  where
+    f :: MonadSym m => FilePath -> MaybeT m Version
+    f p = return $ (takeFileName . takeDirectory) p
 
 highlight :: String -> String
 highlight xs = "\ESC[1m" ++ xs ++ "\ESC[0m"

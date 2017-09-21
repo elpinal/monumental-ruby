@@ -269,24 +269,22 @@ use root [version] = do
 use _ _ = failWith "use: too many arguments"
 
 list :: CmdFunc
-list root [] = do
-  dirs <- runMaybeT . listDir $ root </> "ruby"
-  guard $ isJust dirs
-  putStrLn . highlight $ unlines
+list root [] = fmap (const ()) $ runMaybeT $ do
+  dirs <- listDir $ root </> "ruby"
+  liftIO $ putStrLn . highlight $ unlines
     [ "installed versions"
     , "------------------"
     ]
-  mapM_ putStrLn (fromJust dirs)
+  liftIO $ mapM_ putStrLn dirs
 
-  a <- runMaybeT $ getActive root
-  guard $ isJust a
-  putStrLn $ unlines
+  a <- getActive root
+  liftIO $ putStrLn $ unlines
     [""
     , highlight
       "active version\n\
       \--------------"
     , ""
-    , fromJust a
+    , a
     ]
 list _ _ = failWith "usage: list"
 

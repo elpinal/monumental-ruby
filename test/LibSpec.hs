@@ -18,7 +18,7 @@ instance Functor TestSym where
   fmap f (TestSym x) = TestSym $ fmap f x
 
 instance Applicative TestSym where
-  pure x = TestSym $ reader (\r -> x)
+  pure = TestSym . reader . const
   (TestSym f) <*> (TestSym x) = TestSym $ f <*> x
 
 instance Monad TestSym where

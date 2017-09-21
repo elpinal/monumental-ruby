@@ -9,9 +9,9 @@ import Control.Monad.State.Lazy
 import Data.Either
 import qualified Data.Map.Lazy as Map
 
-newtype TestSym a = TestSym (Reader (Map.Map FilePath FilePath) a)
+newtype TestSym a = TestSym (Reader FileMap a)
 
-runTestSym :: TestSym a -> Reader (Map.Map FilePath FilePath) a
+runTestSym :: TestSym a -> Reader FileMap a
 runTestSym (TestSym x) = x
 
 instance Functor TestSym where
@@ -26,11 +26,16 @@ instance Monad TestSym where
 
 instance MonadSym TestSym where
   readSym p = TestSym $ do
-    m <- ask
+    m <- fmap symMap ask
     return $ Map.findWithDefault (f m) p m
       where
         f :: Map.Map FilePath FilePath -> a
         f m = error $ "not found " ++ show p ++ " in " ++ show m
+
+data FileMap = FileMap
+  { symMap :: Map.Map FilePath FilePath
+  , dirMap :: Map.Map FilePath [FilePath]
+  }
 
 spec :: Spec
 spec = do
@@ -62,4 +67,7 @@ spec = do
 
   describe "getActive" $ do
     it "gets active version" $ do
-      runReader (runTestSym (getActive "root")) (Map.singleton "root/bin" "foo/bar/v2_3_4/baz") `shouldBe` "v2_3_4"
+      let m = FileMap { symMap = Map.singleton "root/bin" "foo/bar/v2_3_4/baz"
+                      , dirMap = Map.empty
+                      }
+      runReader (runTestSym (getActive "root")) m `shouldBe` "v2_3_4"

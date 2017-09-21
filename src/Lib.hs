@@ -268,7 +268,7 @@ use _ _ = failWith "use: too many arguments"
 
 list :: CmdFunc
 list root [] = flip catch ignoreNotExist $ do
-  dirs <- listDirectory $ root </> "ruby"
+  dirs <- listDir $ root </> "ruby"
   putStrLn . highlight $ unlines
     [ "installed versions"
     , "------------------"
@@ -287,9 +287,11 @@ list _ _ = failWith "usage: list"
 
 class Monad m => MonadSym m where
   readSym :: FilePath -> m FilePath
+  listDir :: FilePath -> m [FilePath]
 
 instance MonadSym IO where
   readSym = readSymbolicLink
+  listDir = listDirectory
 
 getActive :: MonadSym m => FilePath -> m Version
 getActive root = return . takeFileName . takeDirectory <=< readSym $ root </> "bin"

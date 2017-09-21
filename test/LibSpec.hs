@@ -31,6 +31,12 @@ instance MonadSym TestSym where
       where
         f :: Map.Map FilePath FilePath -> a
         f m = error $ "not found " ++ show p ++ " in " ++ show m
+  listDir p = TestSym $ do
+    m <- fmap dirMap ask
+    return $ Map.findWithDefault (f m) p m
+      where
+        f :: Map.Map FilePath [FilePath] -> a
+        f m = error $ "not found " ++ show p ++ " in " ++ show m
 
 data FileMap = FileMap
   { symMap :: Map.Map FilePath FilePath

@@ -4,8 +4,33 @@ import Test.Hspec
 import Lib
 
 import Control.Monad.Except
+import Control.Monad.Reader
 import Control.Monad.State.Lazy
 import Data.Either
+import qualified Data.Map.Lazy as Map
+
+newtype TestSym a = TestSym (Reader (Map.Map FilePath FilePath) a)
+
+runTestSym :: TestSym a -> Reader (Map.Map FilePath FilePath) a
+runTestSym (TestSym x) = x
+
+instance Functor TestSym where
+  fmap f (TestSym x) = TestSym $ fmap f x
+
+instance Applicative TestSym where
+  pure x = TestSym $ reader (\r -> x)
+  (TestSym f) <*> (TestSym x) = TestSym $ f <*> x
+
+instance Monad TestSym where
+  (TestSym x) >>= f = TestSym $ x >>= (runTestSym . f)
+
+instance MonadSym TestSym where
+  readSym p = TestSym $ do
+    m <- ask
+    return $ Map.findWithDefault (f m) p m
+      where
+        f :: Map.Map FilePath FilePath -> a
+        f m = error $ "not found " ++ show p ++ " in " ++ show m
 
 spec :: Spec
 spec = do
@@ -34,3 +59,7 @@ spec = do
   describe "highlight" $ do
     it "highlights string" $ do
       highlight "string" `shouldBe` "\ESC[1mstring\ESC[0m"
+
+  describe "getActive" $ do
+    it "gets active version" $ do
+      runReader (runTestSym (getActive "root")) (Map.singleton "root/bin" "foo/bar/v2_3_4/baz") `shouldBe` "v2_3_4"

@@ -285,8 +285,14 @@ list root [] = flip catch ignoreNotExist $ do
     ]
 list _ _ = failWith "usage: list"
 
-getActive :: FilePath -> IO Version
-getActive root = return . takeFileName . takeDirectory <=< readSymbolicLink $ root </> "bin"
+class Monad m => MonadSym m where
+  readSym :: FilePath -> m FilePath
+
+instance MonadSym IO where
+  readSym = readSymbolicLink
+
+getActive :: MonadSym m => FilePath -> m Version
+getActive root = return . takeFileName . takeDirectory <=< readSym $ root </> "bin"
 
 highlight :: String -> String
 highlight xs = "\ESC[1m" ++ xs ++ "\ESC[0m"

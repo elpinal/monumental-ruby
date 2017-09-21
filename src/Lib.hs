@@ -305,10 +305,10 @@ instance MonadSym IO where
   listDir = listDirectory
 
 getActive :: MonadSym m => FilePath -> MaybeT m Version
-getActive root = readSym (root </> "bin") >>= f
+getActive root = f <$> readSym (root </> "bin")
   where
-    f :: MonadSym m => FilePath -> MaybeT m Version
-    f p = return $ (takeFileName . takeDirectory) p
+    f :: FilePath -> Version
+    f = takeFileName . takeDirectory
 
 highlight :: String -> String
 highlight xs = "\ESC[1m" ++ xs ++ "\ESC[0m"

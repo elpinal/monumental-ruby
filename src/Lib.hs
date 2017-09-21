@@ -294,7 +294,7 @@ class Monad m => MonadSym m where
 
 instance MonadSym IO where
   readSym p = MaybeT $ fmap Just (readSymbolicLink p)
-                         `catch` handle 
+                         `catch` handle
     where
       handle :: IOError -> IO (Maybe a)
       handle e = return $

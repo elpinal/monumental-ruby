@@ -271,11 +271,11 @@ use _ _ = failWith "use: too many arguments"
 list :: CmdFunc
 list root [] = do
   dirs <- runMaybeT . listDir $ root </> "ruby"
+  guard $ isJust dirs
   putStrLn . highlight $ unlines
     [ "installed versions"
     , "------------------"
     ]
-  guard $ isJust dirs
   mapM_ putStrLn (fromJust dirs)
 
   a <- runMaybeT $ getActive root

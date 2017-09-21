@@ -277,16 +277,17 @@ list root [] = flip catch ignoreNotExist $ do
     ]
   guard $ isJust dirs
   mapM_ putStrLn (fromJust dirs)
+
   a <- runMaybeT $ getActive root
-  when (isJust a) $
-       putStrLn $ unlines
-         [""
-         , highlight
-           "active version\n\
-           \--------------"
-         , ""
-         , fromJust a
-         ]
+  guard $ isJust a
+  putStrLn $ unlines
+    [""
+    , highlight
+      "active version\n\
+      \--------------"
+    , ""
+    , fromJust a
+    ]
 list _ _ = failWith "usage: list"
 
 class Monad m => MonadSym m where

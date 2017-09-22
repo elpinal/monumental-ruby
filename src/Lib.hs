@@ -269,10 +269,10 @@ use root [version] = do
 use _ _ = failWith "use: too many arguments"
 
 list :: CmdFunc
-list root [] = void . print . execWriterT . runMaybeT $ x
+list root [] = void . print $ list'
   where
-    x :: MonadFS m => MaybeT (WriterT [String] m) ()
-    x = do
+    list' :: MonadFS m => m [String]
+    list' = execWriterT . runMaybeT $ do
       dirs <- mapMaybeT lift $ listDir $ root </> "ruby"
       tell $
         headerForInstalled

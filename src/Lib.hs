@@ -269,27 +269,27 @@ use root [version] = do
 use _ _ = failWith "use: too many arguments"
 
 list :: CmdFunc
-list root [] = void . print $ list'
+list root [] = void . print $ list' root
   where
-    list' :: MonadFS m => m [String]
-    list' = execWriterT . runMaybeT $ do
-      dirs <- mapMaybeT lift $ listDir $ root </> "ruby"
-      tell $
-        headerForInstalled
-        : dirs
-        ++ [""]
-
-      a <- mapMaybeT lift $ getActive root
-      tell
-        [ headerForActive
-        , a
-        , ""
-        ]
-      return ()
-
     print :: IO [String] -> IO ()
     print x = (x >>=) $ mapM_ putStrLn
 list _ _ = failWith "usage: list"
+
+list' :: MonadFS m => FilePath -> m [String]
+list' root = execWriterT . runMaybeT $ do
+  dirs <- mapMaybeT lift $ listDir $ root </> "ruby"
+  tell $
+    headerForInstalled
+    : dirs
+    ++ [""]
+
+  a <- mapMaybeT lift $ getActive root
+  tell
+    [ headerForActive
+    , a
+    , ""
+    ]
+  return ()
 
 headerForInstalled :: String
 headerForInstalled = highlight . unlines $

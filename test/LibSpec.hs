@@ -32,6 +32,12 @@ instance MonadFS TestIO where
     where
       updateSymMap :: FileMap -> FileMap
       updateSymMap m = m { symMap = Map.insert src dest $ symMap m }
+  removeDirLink p = MaybeT . TestIO $ do
+    put . updateSymMap =<< get
+    return $ Just ()
+    where
+      updateSymMap :: FileMap -> FileMap
+      updateSymMap m = m { symMap = Map.delete p $ symMap m }
 
 data FileMap = FileMap
   { symMap :: Map.Map FilePath FilePath

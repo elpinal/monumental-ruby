@@ -8,8 +8,8 @@ import Control.Monad.Reader
 import Control.Monad.State.Lazy
 import Control.Monad.Trans.Maybe
 import Data.Either
-import Data.Maybe
 import qualified Data.Map.Lazy as Map
+import Data.Maybe
 
 newtype TestIO a = TestIO (Reader FileMap a)
 

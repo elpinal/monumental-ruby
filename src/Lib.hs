@@ -303,10 +303,12 @@ headerForActive = highlight . unlines $
 class Monad m => MonadFS m where
   readSym :: FilePath -> MaybeT m FilePath
   listDir :: FilePath -> MaybeT m [FilePath]
+  createSym :: FilePath -> FilePath -> m ()
 
 instance MonadFS IO where
   readSym p = MaybeT $ fmap Just (readSymbolicLink p) `catch` handleNotExistIO
   listDir p = MaybeT $ fmap Just (listDirectory p) `catch` handleNotExistIO
+  createSym = createSymbolicLink
 
 handleNotExistIO :: IOError -> IO (Maybe a)
 handleNotExistIO e = return $

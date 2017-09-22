@@ -269,11 +269,11 @@ use root [version] = do
 use _ _ = failWith "use: too many arguments"
 
 list :: CmdFunc
-list root [] = void . runMaybeT . print . execWriterT $ x
+list root [] = void . print . execWriterT . runMaybeT $ x
   where
-    x :: MonadSym m => WriterT [String] (MaybeT m) ()
+    x :: MonadSym m => MaybeT (WriterT [String] m) ()
     x = do
-      dirs <- lift $ listDir $ root </> "ruby"
+      dirs <- mapMaybeT q $ listDir $ root </> "ruby"
       tell $
         (highlight . unlines)
           [ "installed versions"
@@ -282,7 +282,7 @@ list root [] = void . runMaybeT . print . execWriterT $ x
         : dirs
         ++ [""]
 
-      a <- lift $ getActive root
+      a <- mapMaybeT q $ getActive root
       tell
         [ highlight . unlines $
             [ "active version"
@@ -292,8 +292,12 @@ list root [] = void . runMaybeT . print . execWriterT $ x
         , ""
         ]
       return ()
-    print :: MaybeT IO [String] -> MaybeT IO ()
-    print x = (x >>=) $ liftIO . mapM_ putStrLn
+
+    print :: IO [String] -> IO ()
+    print x = (x >>=) $ mapM_ putStrLn
+
+    q :: Monad m => m (Maybe a) -> WriterT [String] m (Maybe a)
+    q = lift
 list _ _ = failWith "usage: list"
 
 class Monad m => MonadSym m where

@@ -269,7 +269,7 @@ use root [version] = do
 use _ _ = failWith "use: too many arguments"
 
 list :: CmdFunc
-list root [] = mapM_ putStrLn =<< list' root
+list root [] = list' root >>= mapM_ putStrLn
 list _ _ = failWith "usage: list"
 
 list' :: MonadFS m => FilePath -> m [String]

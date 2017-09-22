@@ -73,6 +73,13 @@ spec = do
   describe "list'" $ do
     it "lists installed and active versions" $ do
       let m = FileMap { symMap = Map.singleton "root/bin" "root/ruby/v2_3_4/bin"
-                      , dirMap = Map.singleton "root/ruby" ["v2_3_4"]
+                      , dirMap = Map.singleton "root/ruby" ["v2_2_2", "v2_3_4", "v2_4_1"]
                       }
-      runReader (runTestIO (list' "root")) m `shouldBe` [headerForInstalled, "v2_3_4", "", headerForActive, "v2_3_4", ""]
+      let want = [ headerForInstalled
+                 , "v2_2_2", "v2_3_4", "v2_4_1"
+                 , ""
+                 , headerForActive
+                 , "v2_3_4"
+                 , ""
+                 ]
+      runReader (runTestIO (list' "root")) m `shouldBe` want

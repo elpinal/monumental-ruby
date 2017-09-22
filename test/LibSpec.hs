@@ -69,3 +69,10 @@ spec = do
                       , dirMap = Map.empty
                       }
       runReader (runTestIO . runMaybeT $ getActive "root") m `shouldBe` Just "v2_3_4"
+
+  describe "list'" $ do
+    it "lists installed and active versions" $ do
+      let m = FileMap { symMap = Map.singleton "root/bin" "root/ruby/v2_3_4/bin"
+                      , dirMap = Map.singleton "root/ruby" ["v2_3_4"]
+                      }
+      runReader (runTestIO (list' "root")) m `shouldBe` [headerForInstalled, "v2_3_4", "", headerForActive, "v2_3_4", ""]

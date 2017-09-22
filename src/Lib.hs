@@ -271,7 +271,7 @@ use _ _ = failWith "use: too many arguments"
 list :: CmdFunc
 list root [] = void . print . execWriterT . runMaybeT $ x
   where
-    x :: MonadSym m => MaybeT (WriterT [String] m) ()
+    x :: MonadFS m => MaybeT (WriterT [String] m) ()
     x = do
       dirs <- mapMaybeT lift $ listDir $ root </> "ruby"
       tell $
@@ -297,11 +297,11 @@ list root [] = void . print . execWriterT . runMaybeT $ x
     print x = (x >>=) $ mapM_ putStrLn
 list _ _ = failWith "usage: list"
 
-class Monad m => MonadSym m where
+class Monad m => MonadFS m where
   readSym :: FilePath -> MaybeT m FilePath
   listDir :: FilePath -> MaybeT m [FilePath]
 
-instance MonadSym IO where
+instance MonadFS IO where
   readSym p = MaybeT $ fmap Just (readSymbolicLink p) `catch` handleNotExistIO
   listDir p = MaybeT $ fmap Just (listDirectory p) `catch` handleNotExistIO
 
@@ -312,7 +312,7 @@ handleNotExistIO e = return $
   else
     throw e
 
-getActive :: MonadSym m => FilePath -> MaybeT m Version
+getActive :: MonadFS m => FilePath -> MaybeT m Version
 getActive root = takeFileName . takeDirectory <$> readSym (root </> "bin")
 
 highlight :: String -> String

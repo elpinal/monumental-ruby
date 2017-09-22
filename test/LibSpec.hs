@@ -26,7 +26,7 @@ instance Applicative TestIO where
 instance Monad TestIO where
   (TestIO x) >>= f = TestIO $ x >>= runTestIO . f
 
-instance MonadSym TestIO where
+instance MonadFS TestIO where
   readSym p = MaybeT . TestIO $ Map.lookup p . symMap <$> ask
   listDir p = MaybeT . TestIO $ Map.lookup p . dirMap <$> ask
 

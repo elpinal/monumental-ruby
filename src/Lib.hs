@@ -273,7 +273,7 @@ list root [] = void . print . execWriterT . runMaybeT $ x
   where
     x :: MonadSym m => MaybeT (WriterT [String] m) ()
     x = do
-      dirs <- mapMaybeT q $ listDir $ root </> "ruby"
+      dirs <- mapMaybeT lift $ listDir $ root </> "ruby"
       tell $
         (highlight . unlines)
           [ "installed versions"
@@ -282,7 +282,7 @@ list root [] = void . print . execWriterT . runMaybeT $ x
         : dirs
         ++ [""]
 
-      a <- mapMaybeT q $ getActive root
+      a <- mapMaybeT lift $ getActive root
       tell
         [ highlight . unlines $
             [ "active version"
@@ -295,9 +295,6 @@ list root [] = void . print . execWriterT . runMaybeT $ x
 
     print :: IO [String] -> IO ()
     print x = (x >>=) $ mapM_ putStrLn
-
-    q :: Monad m => m (Maybe a) -> WriterT [String] m (Maybe a)
-    q = lift
 list _ _ = failWith "usage: list"
 
 class Monad m => MonadSym m where

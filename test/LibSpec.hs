@@ -28,7 +28,10 @@ instance Monad TestIO where
 instance MonadFS TestIO where
   readSym p = MaybeT . TestIO $ Map.lookup p . symMap <$> get
   listDir p = MaybeT . TestIO $ Map.lookup p . dirMap <$> get
-  createSym src dest = return () -- FIXME
+  createSym src dest = TestIO $ put . updateSymMap =<< get
+    where
+      updateSymMap :: FileMap -> FileMap
+      updateSymMap m = m { symMap = Map.insert src dest $ symMap m }
 
 data FileMap = FileMap
   { symMap :: Map.Map FilePath FilePath

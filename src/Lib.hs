@@ -275,19 +275,13 @@ list root [] = void . print . execWriterT . runMaybeT $ x
     x = do
       dirs <- mapMaybeT lift $ listDir $ root </> "ruby"
       tell $
-        (highlight . unlines)
-          [ "installed versions"
-          , "------------------"
-          ]
+        headerForInstalled
         : dirs
         ++ [""]
 
       a <- mapMaybeT lift $ getActive root
       tell
-        [ highlight . unlines $
-            [ "active version"
-            , "--------------"
-            ]
+        [ headerForActive
         , a
         , ""
         ]
@@ -296,6 +290,18 @@ list root [] = void . print . execWriterT . runMaybeT $ x
     print :: IO [String] -> IO ()
     print x = (x >>=) $ mapM_ putStrLn
 list _ _ = failWith "usage: list"
+
+headerForInstalled :: String
+headerForInstalled = highlight . unlines $
+  [ "installed versions"
+  , "------------------"
+  ]
+
+headerForActive :: String
+headerForActive = highlight . unlines $
+  [ "active version"
+  , "--------------"
+  ]
 
 class Monad m => MonadFS m where
   readSym :: FilePath -> MaybeT m FilePath

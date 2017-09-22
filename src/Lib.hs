@@ -269,10 +269,7 @@ use root [version] = do
 use _ _ = failWith "use: too many arguments"
 
 list :: CmdFunc
-list root [] = void . print =<< list' root
-  where
-    print :: [String] -> IO ()
-    print = mapM_ putStrLn
+list root [] = mapM_ putStrLn =<< list' root
 list _ _ = failWith "usage: list"
 
 list' :: MonadFS m => FilePath -> m [String]

@@ -33,8 +33,9 @@ instance MonadFS TestIO where
       updateSymMap :: FileMap -> FileMap
       updateSymMap m = m { symMap = Map.insert src dest $ symMap m }
   removeDirLink p = MaybeT . TestIO $ do
+    exists <- Map.member p . symMap <$> get
     put . updateSymMap =<< get
-    return $ Just ()
+    return $ guard exists
     where
       updateSymMap :: FileMap -> FileMap
       updateSymMap m = m { symMap = Map.delete p $ symMap m }

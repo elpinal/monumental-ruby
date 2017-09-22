@@ -8,6 +8,7 @@ import Control.Monad
 import Control.Monad.Except
 import Control.Monad.State.Lazy
 import Control.Monad.Trans.Maybe
+import Control.Monad.Writer.Lazy
 import qualified Data.Map.Lazy as Map
 import System.Directory
 import System.Environment
@@ -268,25 +269,31 @@ use root [version] = do
 use _ _ = failWith "use: too many arguments"
 
 list :: CmdFunc
-list root [] = void . runMaybeT $ do
-  dirs <- listDir $ root </> "ruby"
-  liftIO $ mapM_ putStrLn $
-    (highlight . unlines)
-      [ "installed versions"
-      , "------------------"
-      ]
-    : dirs
-    ++ [""]
+list root [] = void . runMaybeT . print . execWriterT $ x
+  where
+    x :: MonadSym m => WriterT [String] (MaybeT m) ()
+    x = do
+      dirs <- lift $ listDir $ root </> "ruby"
+      tell $
+        (highlight . unlines)
+          [ "installed versions"
+          , "------------------"
+          ]
+        : dirs
+        ++ [""]
 
-  a <- getActive root
-  liftIO $ mapM_ putStrLn
-    [ highlight . unlines $
-        [ "active version"
-        , "--------------"
+      a <- lift $ getActive root
+      tell
+        [ highlight . unlines $
+            [ "active version"
+            , "--------------"
+            ]
+        , a
+        , ""
         ]
-    , a
-    , ""
-    ]
+      return ()
+    print :: MaybeT IO [String] -> MaybeT IO ()
+    print x = (x >>=) $ liftIO . mapM_ putStrLn
 list _ _ = failWith "usage: list"
 
 class Monad m => MonadSym m where

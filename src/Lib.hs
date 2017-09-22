@@ -259,7 +259,7 @@ use root [version] = do
   unless exists $
          failWith $ "use: not installed: " ++ show version
   removeDirectoryLink dest `catch` ignoreNotExist
-  createSymbolicLink src dest
+  createSym src dest
     where
       src :: FilePath
       src = foldl1 combine [root, "ruby", version, "bin"]

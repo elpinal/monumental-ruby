@@ -73,6 +73,7 @@ data Flag =
   | Root FilePath
     deriving (Eq, Ord, Show)
 
+-- | Parses global flags from arguments.
 parseFlag :: ExceptT String (State [String]) [Flag]
 parseFlag = get >>= parse
   where
@@ -94,6 +95,7 @@ parseFlag = get >>= parse
       put args
       return []
 
+-- | A type which represents the main functions of commands.
 type CmdFunc = FilePath -> [String] -> IO ()
 
 data Command = Command { name :: String

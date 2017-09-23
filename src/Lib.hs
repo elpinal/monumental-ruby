@@ -254,16 +254,17 @@ uninstall root versions =
 
 use :: CmdFunc
 use _ [] = failWith "use: 1 argument required"
-use root [version] = use' >>= either putStrLn return
-  where
-    use' :: MonadFS m => m (Either String ())
-    use' = runExceptT $ do
-      exists <- lift $ doesDirExist src
-      unless exists $
-             throwError $ "use: not installed: " ++ show version
-      m2e $ removeDirLink dest
-      lift $ createSym src dest
+use root [version] = use' root version >>= either putStrLn return
+use _ _ = failWith "use: too many arguments"
 
+use' :: MonadFS m => FilePath -> Version -> m (Either String ())
+use' root version = runExceptT $ do
+  exists <- lift $ doesDirExist src
+  unless exists $
+         throwError $ "use: not installed: " ++ show version
+  m2e $ removeDirLink dest
+  lift $ createSym src dest
+  where
     -- MaybeT to ExceptT.
     m2e :: Monad m => MaybeT m () -> ExceptT String m (Maybe ())
     m2e (MaybeT m) = lift m
@@ -273,7 +274,6 @@ use root [version] = use' >>= either putStrLn return
 
     dest :: FilePath
     dest = root </> "bin"
-use _ _ = failWith "use: too many arguments"
 
 list :: CmdFunc
 list root [] = list' root >>= mapM_ putStrLn

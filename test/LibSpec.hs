@@ -28,7 +28,7 @@ instance Monad TestIO where
 instance MonadFS TestIO where
   readSym p = MaybeT . TestIO $ Map.lookup p . symMap <$> get
   listDir p = MaybeT . TestIO $ Map.lookup p . dirMap <$> get
-  createSym src dest = TestIO $ put . updateSymMap (Map.insert src dest) =<< get
+  createSym src dest = TestIO $ put . updateSymMap (Map.insert dest src) =<< get
   removeDirLink p = MaybeT . TestIO $ do
     exists <- Map.member p . symMap <$> get
     put . updateSymMap (Map.delete p) =<< get
@@ -42,6 +42,7 @@ data FileMap = FileMap
   { symMap :: Map.Map FilePath FilePath
   , dirMap :: Map.Map FilePath [FilePath]
   }
+  deriving (Eq, Show)
 
 spec :: Spec
 spec = do
@@ -91,3 +92,16 @@ spec = do
                  , ""
                  ]
       evalState (runTestIO (list' "root")) m `shouldBe` want
+
+  describe "use'" $ do
+    it "sets an active version" $ do
+      let m = FileMap { symMap = Map.singleton "root/bin" "root/ruby/v2_3_4/bin"
+                      , dirMap = Map.fromList
+                                   [ ("root/ruby", ["v2_2_2", "v2_3_4", "v2_4_1"])
+                                   , ("root/ruby/v2_2_2/bin", ["ruby"])
+                                   ]
+                      }
+      -- TODO: Separate these lines.
+      evalState (runTestIO (use' "root" "v2_2_2" >> runMaybeT (getActive "root"))) m `shouldBe` Just "v2_2_2"
+      evalState (runTestIO (use' "root" "v2_2_2" >> use' "root" "v2_2_2")) m `shouldBe` Right ()
+      evalState (runTestIO (use' "root" "v2_2_2" >> use' "root" "no_version")) m `shouldBe` Left "use: not installed: \"no_version\""

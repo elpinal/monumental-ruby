@@ -33,6 +33,7 @@ instance MonadFS TestIO where
     exists <- Map.member p . symMap <$> get
     put . updateSymMap (Map.delete p) =<< get
     return $ guard exists
+  doesDirExist p = TestIO $ Map.member p . dirMap <$> get
 
 updateSymMap :: (Map.Map FilePath FilePath -> Map.Map FilePath FilePath) -> FileMap -> FileMap
 updateSymMap f m = m { symMap = f $ symMap m }

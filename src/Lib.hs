@@ -96,7 +96,9 @@ parseFlag = get >>= parse
       return []
 
 -- | A type which represents the main functions of commands.
-type CmdFunc = FilePath -> [String] -> IO ()
+type CmdFunc = FilePath -- ^ The root directory.
+             -> [String] -- ^ Arguments.
+             -> IO ()
 
 data Command = Command { name :: String
                        , func :: CmdFunc

@@ -143,7 +143,8 @@ doCmd root (name:args) = cmd name root args
     cmd :: String -> CmdFunc
     cmd x = maybe (nocmd x) func $ Map.lookup x cmds
 
--- | Exits with printing an error message which indicates that the provided
+-- |
+-- Exits with printing an error message which indicates that the provided
 -- command is not defined.
 nocmd :: String -> CmdFunc
 nocmd x _ _ = failWith $
@@ -329,7 +330,8 @@ instance MonadFS IO where
   removeDirLink p = MaybeT $ fmap Just (removeDirectoryLink p) `catch` handleNotExistIO
   doesDirExist = doesDirectoryExist
 
--- | Given an exception, returns @Nothing@ when it is @doesNotExistError@,
+-- |
+-- Given an exception, returns @Nothing@ when it is @doesNotExistError@,
 -- otherwise throws it.
 handleNotExistIO :: IOError -> IO (Maybe a)
 handleNotExistIO e = return $

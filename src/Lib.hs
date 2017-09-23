@@ -254,15 +254,19 @@ uninstall root versions =
 
 use :: CmdFunc
 use _ [] = failWith "use: 1 argument required"
-use root [version] = void . runMaybeT $ use'
+use root [version] = either putStrLn return <=< runExceptT $ use'
   where
-    use' :: MonadFS m => MaybeT m ()
+    use' :: MonadFS m => ExceptT String m ()
     use' = do
       exists <- lift $ doesDirExist src
       unless exists $
-             fail $ "use: not installed: " ++ show version
-      removeDirLink dest
+             throwError $ "use: not installed: " ++ show version
+      m2e $ removeDirLink dest
       lift $ createSym src dest
+
+    -- MaybeT to ExceptT.
+    m2e :: Monad m => MaybeT m () -> ExceptT String m (Maybe ())
+    m2e (MaybeT m) = lift m
 
     src :: FilePath
     src = foldl1 combine [root, "ruby", version, "bin"]

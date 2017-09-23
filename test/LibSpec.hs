@@ -104,7 +104,7 @@ spec = do
       -- TODO: Separate these lines.
       evalState (runTestIO (use' "root" "v2_2_2" >> runMaybeT (getActive "root"))) m `shouldBe` Just "v2_2_2"
       evalState (runTestIO (use' "root" "v2_2_2" >> use' "root" "v2_2_2")) m `shouldBe` Right ()
-      evalState (runTestIO (use' "root" "v2_2_2" >> use' "root" "no_version")) m `shouldBe` Left "use: not installed: \"no_version\""
+      evalState (runTestIO (use' "root" "v2_2_2" >> use' "root" "no_version")) m `shouldBe` Left (NotInstalledError "no_version")
 
     it "sets an active version" $ do
       let m = FileMap { symMap = Map.empty

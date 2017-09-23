@@ -273,19 +273,19 @@ uninstall root versions =
 -- | A function that computes "use" command.
 use :: CmdFunc
 use _ [] = failWith "use: 1 argument required"
-use root [version] = use' root version >>= either failWith return
+use root [version] = use' root version >>= either (failWith . show) return
 use _ _ = failWith "use: too many arguments"
 
-use' :: MonadFS m => FilePath -> Version -> m (Either String ())
+use' :: MonadFS m => FilePath -> Version -> m (Either NotInstalledError ())
 use' root version = runExceptT $ do
   exists <- lift $ doesDirExist src
   unless exists $
-         throwError $ "use: not installed: " ++ show version
+         throwError $ NotInstalledError version
   m2e $ removeDirLink dest
   lift $ createSym src dest
   where
     -- MaybeT to ExceptT.
-    m2e :: Monad m => MaybeT m () -> ExceptT String m ()
+    m2e :: Monad m => MaybeT m () -> ExceptT e m ()
     m2e (MaybeT _) = return ()
 
     src :: FilePath
@@ -293,6 +293,11 @@ use' root version = runExceptT $ do
 
     dest :: FilePath
     dest = root </> "bin"
+
+newtype NotInstalledError = NotInstalledError String deriving Eq
+
+instance Show NotInstalledError where
+  show (NotInstalledError s) = "use: not installed: " ++ show s
 
 -- | A function that computes "list" command.
 list :: CmdFunc

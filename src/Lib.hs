@@ -217,8 +217,14 @@ install root versions = do
   mapM_ (clone root) versions
   mapM_ (build root) versions
 
+-- | A version string.
 type Version = String
 
+-- |
+-- Creates the path of a version-specific repository.
+--
+-- >>> getDest "root" "version"
+-- "root/repo/version"
 getDest :: FilePath -> Version -> FilePath
 getDest root version = foldl1 combine [root, "repo", version]
 

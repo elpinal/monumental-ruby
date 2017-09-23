@@ -281,12 +281,11 @@ use' root version = runExceptT $ do
   exists <- lift $ doesDirExist src
   unless exists $
          throwError $ NotInstalledError version
-  m2e $ removeDirLink dest
+  ignore $ removeDirLink dest
   lift $ createSym src dest
   where
-    -- MaybeT to ExceptT.
-    m2e :: Monad m => MaybeT m () -> ExceptT e m ()
-    m2e (MaybeT _) = return ()
+    ignore :: Monad m => MaybeT m () -> ExceptT e m ()
+    ignore (MaybeT _) = return ()
 
     src :: FilePath
     src = foldl1 combine [root, "ruby", version, "bin"]

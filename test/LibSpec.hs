@@ -28,17 +28,14 @@ instance Monad TestIO where
 instance MonadFS TestIO where
   readSym p = MaybeT . TestIO $ Map.lookup p . symMap <$> get
   listDir p = MaybeT . TestIO $ Map.lookup p . dirMap <$> get
-  createSym src dest = TestIO $ put . updateSymMap =<< get
-    where
-      updateSymMap :: FileMap -> FileMap
-      updateSymMap m = m { symMap = Map.insert src dest $ symMap m }
+  createSym src dest = TestIO $ put . updateSymMap (Map.insert src dest) =<< get
   removeDirLink p = MaybeT . TestIO $ do
     exists <- Map.member p . symMap <$> get
-    put . updateSymMap =<< get
+    put . updateSymMap (Map.delete p) =<< get
     return $ guard exists
-    where
-      updateSymMap :: FileMap -> FileMap
-      updateSymMap m = m { symMap = Map.delete p $ symMap m }
+
+updateSymMap :: (Map.Map FilePath FilePath -> Map.Map FilePath FilePath) -> FileMap -> FileMap
+updateSymMap f m = m { symMap = f $ symMap m }
 
 data FileMap = FileMap
   { symMap :: Map.Map FilePath FilePath

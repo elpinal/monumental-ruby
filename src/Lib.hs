@@ -23,7 +23,11 @@ import System.Process
 repoURI :: String
 repoURI = "https://github.com/ruby/ruby"
 
--- | Joins a directory with @".monumental-ruby"@.
+-- |
+-- Joins a directory with @".monumental-ruby"@.
+--
+-- >>> rootPath "home"
+-- "home/.monumental-ruby"
 rootPath :: FilePath -> FilePath
 rootPath = flip combine ".monumental-ruby"
 

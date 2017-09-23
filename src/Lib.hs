@@ -190,6 +190,7 @@ usage =
          , ("-root", "set root directory")
          ]
 
+-- | A function that computes "help" command.
 help :: CmdFunc
 help _ [] = putStrLn usage
 help _ [topic] = maybe noTopic (putStrLn . cmdUsage) $ Map.lookup topic cmds
@@ -203,6 +204,7 @@ help _ _ =
             , "Too many arguments given."
             ]
 
+-- | A function that computes "install" command.
 install :: CmdFunc
 install _ [] = failWith "install: 1 or more arguments required"
 install root versions = do
@@ -244,6 +246,7 @@ build root version =
 ignoreNotExist :: IOError -> IO ()
 ignoreNotExist = unless . isDoesNotExistError <*> throw
 
+-- | A function that computes "install" command.
 uninstall :: CmdFunc
 uninstall _ [] = failWith "usage: monumental-ruby uninstall versions..."
 uninstall root versions =
@@ -252,6 +255,7 @@ uninstall root versions =
       remove :: FilePath -> IO ()
       remove = flip catch ignoreNotExist . removeDirectoryRecursive
 
+-- | A function that computes "use" command.
 use :: CmdFunc
 use _ [] = failWith "use: 1 argument required"
 use root [version] = use' root version >>= either failWith return
@@ -275,6 +279,7 @@ use' root version = runExceptT $ do
     dest :: FilePath
     dest = root </> "bin"
 
+-- | A function that computes "list" command.
 list :: CmdFunc
 list root [] = list' root >>= mapM_ putStrLn
 list _ _ = failWith "usage: list"
@@ -295,18 +300,21 @@ list' root = execWriterT . runMaybeT $ do
     ]
   return ()
 
+-- | The header for installed versions.
 headerForInstalled :: String
 headerForInstalled = highlight . unlines $
   [ "installed versions"
   , "------------------"
   ]
 
+-- | The header for an active version.
 headerForActive :: String
 headerForActive = highlight . unlines $
   [ "active version"
   , "--------------"
   ]
 
+-- | Abstract IO actions.
 class Monad m => MonadFS m where
   readSym :: FilePath -> MaybeT m FilePath
   listDir :: FilePath -> MaybeT m [FilePath]
@@ -321,6 +329,8 @@ instance MonadFS IO where
   removeDirLink p = MaybeT $ fmap Just (removeDirectoryLink p) `catch` handleNotExistIO
   doesDirExist = doesDirectoryExist
 
+-- | Given an exception, returns @Nothing@ when it is @doesNotExistError@,
+-- otherwise throws it.
 handleNotExistIO :: IOError -> IO (Maybe a)
 handleNotExistIO e = return $
   if isDoesNotExistError e then
@@ -328,8 +338,10 @@ handleNotExistIO e = return $
   else
     throw e
 
+-- | Gets an active version.
 getActive :: MonadFS m => FilePath -> MaybeT m Version
 getActive root = takeFileName . takeDirectory <$> readSym (root </> "bin")
 
+-- | Highlights @xs@ with escape sequences.
 highlight :: String -> String
 highlight xs = "\ESC[1m" ++ xs ++ "\ESC[0m"

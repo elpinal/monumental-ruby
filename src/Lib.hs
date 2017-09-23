@@ -254,7 +254,7 @@ uninstall root versions =
 
 use :: CmdFunc
 use _ [] = failWith "use: 1 argument required"
-use root [version] = use' root version >>= either putStrLn return
+use root [version] = use' root version >>= either failWith return
 use _ _ = failWith "use: too many arguments"
 
 use' :: MonadFS m => FilePath -> Version -> m (Either String ())

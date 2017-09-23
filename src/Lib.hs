@@ -342,6 +342,10 @@ handleNotExistIO e = return $
 getActive :: MonadFS m => FilePath -> MaybeT m Version
 getActive root = takeFileName . takeDirectory <$> readSym (root </> "bin")
 
--- | Highlights @xs@ with escape sequences.
+-- |
+-- Highlights @xs@ with escape sequences.
+--
+-- >>> highlight "STR"
+-- "\ESC[1mSTR\ESC[0m"
 highlight :: String -> String
 highlight xs = "\ESC[1m" ++ xs ++ "\ESC[0m"

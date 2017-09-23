@@ -254,12 +254,12 @@ uninstall root versions =
 
 use :: CmdFunc
 use _ [] = failWith "use: 1 argument required"
-use root [version] = do
-  exists <- doesDirectoryExist src
+use root [version] = void . runMaybeT $ do
+  exists <- lift $ doesDirectoryExist src
   unless exists $
-         failWith $ "use: not installed: " ++ show version
-  removeDirectoryLink dest `catch` ignoreNotExist
-  createSym src dest
+         liftIO $ failWith $ "use: not installed: " ++ show version
+  removeDirLink dest
+  lift $ createSym src dest
     where
       src :: FilePath
       src = foldl1 combine [root, "ruby", version, "bin"]

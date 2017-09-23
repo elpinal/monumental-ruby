@@ -254,10 +254,10 @@ uninstall root versions =
 
 use :: CmdFunc
 use _ [] = failWith "use: 1 argument required"
-use root [version] = either putStrLn return <=< runExceptT $ use'
+use root [version] = use' >>= either putStrLn return
   where
-    use' :: MonadFS m => ExceptT String m ()
-    use' = do
+    use' :: MonadFS m => m (Either String ())
+    use' = runExceptT $ do
       exists <- lift $ doesDirExist src
       unless exists $
              throwError $ "use: not installed: " ++ show version

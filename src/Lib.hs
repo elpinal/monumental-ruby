@@ -266,8 +266,8 @@ use' root version = runExceptT $ do
   lift $ createSym src dest
   where
     -- MaybeT to ExceptT.
-    m2e :: Monad m => MaybeT m () -> ExceptT String m (Maybe ())
-    m2e (MaybeT m) = lift m
+    m2e :: Monad m => MaybeT m () -> ExceptT String m ()
+    m2e (MaybeT _) = return ()
 
     src :: FilePath
     src = foldl1 combine [root, "ruby", version, "bin"]

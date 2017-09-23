@@ -254,18 +254,21 @@ uninstall root versions =
 
 use :: CmdFunc
 use _ [] = failWith "use: 1 argument required"
-use root [version] = void . runMaybeT $ do
-  exists <- lift $ doesDirectoryExist src
-  unless exists $
-         liftIO $ failWith $ "use: not installed: " ++ show version
-  removeDirLink dest
-  lift $ createSym src dest
-    where
-      src :: FilePath
-      src = foldl1 combine [root, "ruby", version, "bin"]
+use root [version] = void . runMaybeT $ use'
+  where
+    use' :: MonadFS m => MaybeT m ()
+    use' = do
+      exists <- lift $ doesDirExist src
+      unless exists $
+             fail $ "use: not installed: " ++ show version
+      removeDirLink dest
+      lift $ createSym src dest
 
-      dest :: FilePath
-      dest = root </> "bin"
+    src :: FilePath
+    src = foldl1 combine [root, "ruby", version, "bin"]
+
+    dest :: FilePath
+    dest = root </> "bin"
 use _ _ = failWith "use: too many arguments"
 
 list :: CmdFunc

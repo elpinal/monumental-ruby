@@ -65,7 +65,7 @@ spec = do
     it "returns an error when given flag does not exist" $ do
       let xs = ["-no-such-flag", "arg"]
       let (flags, args) = runState (runExceptT parseFlag) xs
-      isLeft flags `shouldBe` True
+      flags `shouldSatisfy` isLeft
       args `shouldBe` ["-no-such-flag", "arg"]
 
   describe "highlight" $ do

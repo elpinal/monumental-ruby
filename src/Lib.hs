@@ -3,6 +3,7 @@ The functions for the executable of monumental-ruby.
 -}
 module Lib where
 
+import Control.Arrow
 import Control.Exception.Safe
 import Control.Monad
 import Control.Monad.Except
@@ -37,9 +38,7 @@ run = do
   args <- getArgs
   home <- getHomeDirectory
   result <- runExceptT $ run' home args
-  case result of
-    Left msg -> failWith msg
-    _ -> return ()
+  failWith ||| return $ result
 
 run' :: FilePath -> [String] -> ExceptT String IO ()
 run' home xs = do

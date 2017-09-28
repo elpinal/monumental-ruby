@@ -8,7 +8,6 @@ import Control.Monad.State.Lazy
 import Control.Monad.Trans.Maybe
 import Data.Either
 import qualified Data.Map.Lazy as Map
-import Data.Maybe
 
 newtype TestIO a = TestIO (State FileMap a)
 

@@ -1,4 +1,4 @@
-{-|
+{- |
 The functions for the executable of monumental-ruby.
 -}
 module Lib where

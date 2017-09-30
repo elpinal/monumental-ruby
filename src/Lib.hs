@@ -334,15 +334,15 @@ headerForActive = highlight . unlines $
 class Monad m => MonadFS m where
   readSym :: FilePath -> MaybeT m FilePath
   listDir :: FilePath -> MaybeT m [FilePath]
-  createSym :: FilePath -> FilePath -> m ()
   removeDirLink :: FilePath -> MaybeT m ()
+  createSym :: FilePath -> FilePath -> m ()
   doesDirExist :: FilePath -> m Bool
 
 instance MonadFS IO where
   readSym = notExistMay . readSymbolicLink
   listDir = notExistMay . listDirectory
-  createSym = createSymbolicLink
   removeDirLink = notExistMay . removeDirectoryLink
+  createSym = createSymbolicLink
   doesDirExist = doesDirectoryExist
 
 notExistMay :: MonadCatch m => m a -> MaybeT m a

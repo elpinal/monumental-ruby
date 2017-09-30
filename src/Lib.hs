@@ -85,8 +85,8 @@ parseFlag = get >>= parse
       flags <- parseFlag
       return $ Help : flags
     parse ("-root":xs) = do
-      when (null xs)
-           (throwError "-root: need argument")
+      when (null xs) $
+           throwError "-root: need argument"
       put $ tail xs
       flags <- parseFlag
       return $ Root (head xs) : flags

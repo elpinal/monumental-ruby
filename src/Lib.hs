@@ -93,9 +93,7 @@ parseFlag = get >>= parse
     parse (flag@('-':_):_) = throwError $
                                "no such flag: " ++ show flag ++ "\n" ++
                                "Run 'monumental-ruby help' for usage."
-    parse args = do
-      put args
-      return []
+    parse _ = return []
 
 -- | A type which represents the main functions of commands.
 type CmdFunc = FilePath -- ^ The root directory.

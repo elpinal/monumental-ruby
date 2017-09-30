@@ -45,11 +45,11 @@ data FileMap = FileMap
 
 spec :: Spec
 spec = do
-  describe "getDest" $ do
-    it "gets destination" $ do
+  describe "getDest" $
+    it "gets destination" $
       getDest "root-directory" "v2_3_4" `shouldBe` "root-directory/repo/v2_3_4"
 
-  describe "rootPath" $ do
+  describe "rootPath" $
     it "gets root path from home path" $ do
       let home = "home"
       rootPath home `shouldBe` "home/.monumental-ruby"
@@ -67,18 +67,18 @@ spec = do
       flags `shouldSatisfy` isLeft
       args `shouldBe` ["-no-such-flag", "arg"]
 
-  describe "highlight" $ do
-    it "highlights string" $ do
+  describe "highlight" $
+    it "highlights string" $
       highlight "string" `shouldBe` "\ESC[1mstring\ESC[0m"
 
-  describe "getActive" $ do
+  describe "getActive" $
     it "gets active version" $ do
       let m = FileMap { symMap = Map.singleton "root/bin" "foo/bar/v2_3_4/baz"
                       , dirMap = Map.empty
                       }
       evalState (runTestIO . runMaybeT $ getActive "root") m `shouldBe` Just "v2_3_4"
 
-  describe "list'" $ do
+  describe "list'" $
     it "lists installed and active versions" $ do
       let m = FileMap { symMap = Map.singleton "root/bin" "root/ruby/v2_3_4/bin"
                       , dirMap = Map.singleton "root/ruby" ["v2_2_2", "v2_3_4", "v2_4_1"]

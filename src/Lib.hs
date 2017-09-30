@@ -339,10 +339,10 @@ class Monad m => MonadFS m where
   doesDirExist :: FilePath -> m Bool
 
 instance MonadFS IO where
-  readSym p = notExistMay $ readSymbolicLink p
-  listDir p = notExistMay $ listDirectory p
+  readSym = notExistMay . readSymbolicLink
+  listDir = notExistMay . listDirectory
   createSym = createSymbolicLink
-  removeDirLink p = notExistMay $ removeDirectoryLink p
+  removeDirLink = notExistMay . removeDirectoryLink
   doesDirExist = doesDirectoryExist
 
 notExistMay :: MonadCatch m => m a -> MaybeT m a

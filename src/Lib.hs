@@ -63,8 +63,7 @@ run' home xs = do
     helpOrCmd _ = doCmd
 
     setRoot :: Maybe (Either String FilePath) -> IO (Either String FilePath)
-    setRoot Nothing = return . Right $ rootPath home
-    setRoot (Just e) = return e
+    setRoot = flip maybe return $ return . Right $ rootPath home
 
 -- | Prints an error message to @stderr@ and exits with a failure code.
 failWith :: String -> IO a

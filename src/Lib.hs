@@ -339,11 +339,14 @@ class Monad m => MonadFS m where
   doesDirExist :: FilePath -> m Bool
 
 instance MonadFS IO where
-  readSym p = MaybeT $ fmap Just (readSymbolicLink p) `catch` handleNotExistIO
-  listDir p = MaybeT $ fmap Just (listDirectory p) `catch` handleNotExistIO
+  readSym p = notExistMay $ readSymbolicLink p
+  listDir p = notExistMay $ listDirectory p
   createSym = createSymbolicLink
-  removeDirLink p = MaybeT $ fmap Just (removeDirectoryLink p) `catch` handleNotExistIO
+  removeDirLink p = notExistMay $ removeDirectoryLink p
   doesDirExist = doesDirectoryExist
+
+notExistMay :: IO a -> MaybeT IO a
+notExistMay a = MaybeT $ fmap Just a `catch` handleNotExistIO
 
 -- |
 -- Given an exception, returns @Nothing@ when it is @doesNotExistError@,

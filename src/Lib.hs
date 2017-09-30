@@ -345,13 +345,13 @@ instance MonadFS IO where
   removeDirLink p = notExistMay $ removeDirectoryLink p
   doesDirExist = doesDirectoryExist
 
-notExistMay :: IO a -> MaybeT IO a
+notExistMay :: MonadCatch m => m a -> MaybeT m a
 notExistMay a = MaybeT $ fmap Just a `catch` handleNotExistIO
 
 -- |
 -- Given an exception, returns @Nothing@ when it is @doesNotExistError@,
 -- otherwise throws it.
-handleNotExistIO :: IOError -> IO (Maybe a)
+handleNotExistIO :: Monad m => IOError -> m (Maybe a)
 handleNotExistIO e = return $
   if isDoesNotExistError e then
     Nothing

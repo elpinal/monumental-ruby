@@ -304,10 +304,8 @@ list' :: MonadFS m => FilePath -> m [String]
 list' root = execWriterT . runMaybeT $ do
   dirs <- mapMaybeT lift $ listDir $ root </> "ruby"
   tell $ headerForInstalled : dirs ++ [""]
-
   a <- mapMaybeT lift $ getActive root
   tell [headerForActive , a , ""]
-  return ()
 
 -- | The header for installed versions.
 headerForInstalled :: String
